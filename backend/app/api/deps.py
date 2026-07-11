@@ -106,3 +106,8 @@ def get_timeline_builder() -> TimelineBuilder:
         TimelineBuilder: The module-level singleton.
     """
     return _timeline_builder
+
+
+# ── Authentication and Authorization Dependencies ───────────────────────────
+
+from app.api.routers.auth import get_current_user, require_roles

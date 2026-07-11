@@ -754,6 +754,19 @@ class TrustEngine:
             + _WEIGHT_BEHAVIOR * behavior_score
             + _WEIGHT_POLICY * policy_score
         )
+        composite = _clamp(composite)
+
+        # Trust Poisoning Mitigation: Rate limit trust score modifications
+        # Trust accumulation (jumps up) must be slow (max +0.05 per event)
+        # Trust degradation (drops down) is capped at -0.25 per event to prevent behavioral/trust oscillation poisoning
+        # (Unless it is a severe block, in which case we allow immediate drop)
+        delta = composite - history_score
+        if delta > 0.05:
+            composite = history_score + 0.05
+        elif delta < -0.25:
+            if policy_score > 0.20:
+                composite = history_score - 0.25
+
         return _clamp(composite)
 
     @staticmethod

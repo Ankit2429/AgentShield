@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 
-from app.api.deps import get_trust_engine
+from app.api.deps import get_trust_engine, require_roles
 from app.api.schemas import AgentListResponse, AgentProfileResponse
 from app.core.trust_engine import AgentTrustProfile, TrustEngine
 
@@ -42,6 +42,7 @@ router = APIRouter(prefix="/agents", tags=["Agents"])
     "",
     response_model=AgentListResponse,
     summary="List Agent Trust Profiles",
+    dependencies=[Depends(require_roles("Admin", "Security Analyst", "Viewer"))],
     description=(
         "Returns all AI agent trust profiles held in the Trust Engine, "
         "sorted by trust score descending."

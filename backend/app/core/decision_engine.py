@@ -535,7 +535,7 @@ class DecisionEngine:
             trust=self._evaluate_trust(trust_profile),
             behavior=self._evaluate_behavior(trust_profile),
             policy=self._evaluate_policy(trust_profile),
-            tool=self._evaluate_tool(requested_tool),
+            tool=self._evaluate_tool(requested_tool, context),
         )
 
         result = self._finalize_decision(
@@ -690,22 +690,38 @@ class DecisionEngine:
             reasons=reasons,
         )
 
-    def _evaluate_tool(self, requested_tool: Optional[str]) -> _ToolFinding:
+    def _evaluate_tool(self, requested_tool: Optional[str], context: Optional[dict[str, Any]] = None) -> _ToolFinding:
         """Evaluate whether the requested tool is authorized.
 
         Args:
             requested_tool: The capability name requested by the agent, or
                 ``None`` if the request is not tool-specific.
+            context: Optional evaluation context containing interceptor findings.
 
         Returns:
             :class:`_ToolFinding` summarising tool-authorization signals.
-
-        Note:
-            TODO [POLICY]: Resolve tool authorization from an external policy
-            engine (e.g. OPA, Cedar) rather than a static frozenset.
         """
         reasons: list[ReasonCode] = []
         is_unauthorized = False
+
+        if context:
+            # Check for identity spoofing and authorization policy violations
+            if context.get("auth_matrix_authorized") is False or context.get("identity_spoofed") is True:
+                reasons.append(ReasonCode.UNAUTHORIZED_TOOL)
+                is_unauthorized = True
+            
+            # Map interceptor telemetry findings to appropriate reason codes
+            interceptor_findings = context.get("interceptor_findings", [])
+            for finding in interceptor_findings:
+                if "Data Exfiltration" in finding:
+                    reasons.append(ReasonCode.NETWORK_EXFILTRATION)
+                    is_unauthorized = True
+                elif "Recursive Tool Loop" in finding:
+                    reasons.append(ReasonCode.POLICY_VIOLATION)
+                    is_unauthorized = True
+                elif "Indirect Prompt Injection" in finding:
+                    reasons.append(ReasonCode.PROMPT_INJECTION)
+                    is_unauthorized = True
 
         if requested_tool is not None:
             tool_lower = requested_tool.lower()

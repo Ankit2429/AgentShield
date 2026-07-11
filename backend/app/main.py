@@ -19,10 +19,16 @@ TODO [LIFESPAN]:   Add an ``asynccontextmanager`` lifespan to warm up heavy
                    resources (DB pool, ML models) before serving traffic.
 """
 
+import os
 import time
+import traceback
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api import v1_router
 from app.config import settings
@@ -41,15 +47,103 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+# ── Custom Middlewares ────────────────────────────────────────────────────────
+
+class HardeningHeadersMiddleware(BaseHTTPMiddleware):
+    """Inject browser security hardening headers into all responses."""
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["Cache-Control"] = "no-store, max-age=0"
+        
+        # CSP: Safe directives allowing local self, WebSockets, and scripts
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "connect-src 'self' ws: wss: http: https:;"
+        )
+        return response
+
+
+class RequestSizeLimiterMiddleware(BaseHTTPMiddleware):
+    """Enforce request size limits (max 2MB) to prevent buffer overflows."""
+    def __init__(self, app, max_upload_size: int = 2 * 1024 * 1024):
+        super().__init__(app)
+        self.max_upload_size = max_upload_size
+
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                if int(content_length) > self.max_upload_size:
+                    return JSONResponse(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        content={"detail": "Payload too large. Maximum size allowed is 2MB."}
+                    )
+            except ValueError:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"detail": "Invalid Content-Length header."}
+                )
+        return await call_next(request)
+
+
+app.add_middleware(HardeningHeadersMiddleware)
+app.add_middleware(RequestSizeLimiterMiddleware)
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
-# TODO [AUTH]: Restrict allow_origins to the production frontend domain.
+# Restrict origins in production environment
+cors_allowed_origins = ["*"]
+if settings.APP_ENV == "production":
+    cors_allowed_origins = [os.getenv("CORS_ORIGIN_WHITELIST", "http://localhost:3000")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Exception Handlers ────────────────────────────────────────────────────────
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Centralized validation error handler that suppresses raw framework output."""
+    # Create structured warning log
+    print(f"[SECURITY WARNING] Validation failed on path {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": "Request validation failed. Malformed inputs or unexpected fields detected."}
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Standard HTTP exception handler."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    """Fallback handler that suppresses internal tracebacks in production."""
+    # Write structured audit/error log to stderr
+    print(f"[CRITICAL ERROR] Unhandled request error on path {request.url.path}: {exc}")
+    traceback.print_exc()
+    
+    detail = "An internal server error occurred."
+    if settings.APP_ENV == "development":
+        detail = f"Unhandled Exception: {exc}"
+        
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": detail}
+    )
 
 # ── API v1 ────────────────────────────────────────────────────────────────────
 app.include_router(v1_router)

@@ -34,9 +34,13 @@ TODO [WEBHOOK]:    Dispatch a webhook to caller-registered URLs when the
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from app.core.ws import ws_manager
+from app.config import settings
 
 from app.api.deps import (
     get_decision_engine,
@@ -45,7 +49,11 @@ from app.api.deps import (
     get_replay_engine,
     get_timeline_builder,
     get_trust_engine,
+    require_roles,
 )
+from app.core.replay_protector import replay_protector
+from app.core.auth_matrix import auth_matrix
+from app.core.interceptor import message_interceptor
 from app.api.schemas import (
     AnalyzeRequest,
     AnalyzeResponse,
@@ -74,6 +82,7 @@ router = APIRouter(prefix="/analyze", tags=["Analyze"])
     "",
     response_model=AnalyzeResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("Admin", "Security Analyst"))],
     summary="Analyze an AI Agent Message",
     description=(
         "Runs a message through the full AgentShield X security pipeline: "
@@ -81,7 +90,7 @@ router = APIRouter(prefix="/analyze", tags=["Analyze"])
         "Returns a structured result and creates a replay session."
     ),
 )
-def analyze(
+async def analyze(
     request: AnalyzeRequest,
     detection_engine: DetectionEngine = Depends(get_detection_engine),
     trust_engine: TrustEngine = Depends(get_trust_engine),
@@ -109,62 +118,209 @@ def analyze(
         :exc:`fastapi.HTTPException` 500: If the pipeline raises an unexpected
         exception.  The replay session is failed before re-raising.
     """
+    # ── Replay Protection Deduplication ─────────────────────────────────────
+    client_event_id = request.metadata.get("event_id") or request.metadata.get("event_uuid")
+    import uuid
+    event_id = str(client_event_id) if client_event_id else str(uuid.uuid4())
+
+    if not replay_protector.check_and_register(
+        event_id=event_id,
+        agent_id=request.agent_id,
+        message=request.message,
+        tool=request.requested_tool
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Duplicate request payload or event ID detected. Request rejected by replay protection engine."
+        )
+
     # ── 1. Create SecurityEvent ───────────────────────────────────────────────
     event = make_event(
         agent_id=request.agent_id,
         message=request.message,
         requested_tool=request.requested_tool,
         metadata=request.metadata,
+        event_id=event_id,
     )
 
     # Open a replay session immediately so we can fail it gracefully.
     session = replay_engine.create_session(event.event_id, event.agent_id)
 
+    # Broadcast Stage 1: RECEIVED
+    await ws_manager.broadcast({
+        "type": "pipeline_progress",
+        "stage": "RECEIVED",
+        "agent_id": event.agent_id,
+        "session_id": session.session_id,
+        "data": {
+            "message": event.message,
+            "requested_tool": event.requested_tool,
+            "timestamp": event.timestamp.isoformat()
+        }
+    })
+
+    # Claimed role can be provided in metadata (defaults to 'viewer_agent')
+    claimed_role = request.metadata.get("agent_role") or "viewer_agent"
+    identity_spoofed = not auth_matrix.verify_agent_identity(event.agent_id, claimed_role)
+
+    # Capability Matrix Check (prevents Tool Abuse & Unauthorized Tool Calls)
+    auth_matrix_authorized = True
+    if event.requested_tool:
+        resource = request.metadata.get("resource") or "default_resource"
+        auth_matrix_authorized = auth_matrix.check_authorization(claimed_role, event.requested_tool, resource)
+
+    # Interceptor checks (Indirect Prompt Injection, Loops, Cross-Agent, Exfil)
+    interceptor_res = message_interceptor.intercept_message(
+        message=event.message,
+        session_id=session.session_id,
+        agent_id=event.agent_id,
+        requested_tool=event.requested_tool,
+        context=request.metadata,
+    )
+    interceptor_findings = interceptor_res.get("findings", [])
+
     try:
         # ── 2. Detection ──────────────────────────────────────────────────────
+        await asyncio.sleep(0.3)
         det_result = detection_engine.analyze(event.message)
         event = enrich(event, detection_result=det_result)
 
-        # ── 3. Behavioral DNA — register observation + analyse deviation ──────
+        # Broadcast Stage 2: DETECTION
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "DETECTION",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "is_malicious": det_result.is_malicious,
+                "risk_score": det_result.risk_score,
+                "threat_count": det_result.threat_count
+            }
+        })
+
+        # ── 3. Behavioral DNA ─────────────────────────────────────────────────
+        await asyncio.sleep(0.3)
         obs = obs_from_event(event)
         dna_engine.register_observation(event.agent_id, obs)
         ba = dna_engine.analyze_behavior(event.agent_id, obs)
-        # ba may be a neutral NORMAL with no reasons if baseline insufficient;
-        # we still enrich and surface it.
         event = enrich(event, behavior_analysis=ba)
 
+        # Broadcast Stage 3: BEHAVIOR
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "BEHAVIOR",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "behavior_similarity": ba.behavior_similarity if ba else 1.0,
+                "behavior_deviation": ba.behavior_deviation if ba else 0.0,
+                "deviation_level": ba.deviation_level.value if ba else "NORMAL",
+                "summary": ba.summary if ba else "Insufficent baseline"
+            }
+        })
+
         # ── 4. Trust ──────────────────────────────────────────────────────────
+        await asyncio.sleep(0.3)
         trust_profile = trust_engine.register_agent(event.agent_id)
-        # Update trust based on the detection outcome.
         if det_result.is_malicious:
             trust_profile = trust_engine.record_block(event.agent_id)
         else:
             trust_profile = trust_engine.record_success(event.agent_id)
         event = enrich(event, trust_profile=trust_profile)
 
+        # Broadcast Stage 4: TRUST
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "TRUST",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "trust_score": trust_profile.trust_score,
+                "behavior_score": trust_profile.behavior_score,
+                "policy_score": trust_profile.policy_score,
+                "security_grade": trust_profile.security_grade,
+                "status": trust_profile.status.value,
+                "trend": trust_profile.trend.value
+            }
+        })
+
         # ── 5. Decision ───────────────────────────────────────────────────────
+        await asyncio.sleep(0.3)
+        eval_context = {
+            "identity_spoofed": identity_spoofed,
+            "auth_matrix_authorized": auth_matrix_authorized,
+            "interceptor_findings": interceptor_findings,
+        }
         decision_result = decision_engine.decide(
             detection_result=det_result,
             trust_profile=trust_profile,
             requested_tool=event.requested_tool,
+            context=eval_context,
         )
         event = enrich(event, decision_result=decision_result)
 
+        # Broadcast Stage 5: DECISION
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "DECISION",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "decision": decision_result.decision.value,
+                "confidence": decision_result.confidence,
+                "severity": decision_result.severity.value,
+                "explanation": decision_result.explanation
+            }
+        })
+
         # ── 6. Build and complete replay session ──────────────────────────────
+        await asyncio.sleep(0.3)
         for frame in timeline_builder.build(event):
             replay_engine.add_frame(session.session_id, frame)
         summary = TimelineBuilder.generate_summary(event)
         replay_engine.complete_session(session.session_id, summary)
+        message_interceptor.clear_session(session.session_id)
+
+        # Broadcast Stage 6: REPLAY
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "REPLAY",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "session_id": session.session_id
+            }
+        })
 
     except Exception as exc:  # noqa: BLE001
         replay_engine.fail_session(session.session_id, str(exc))
+        message_interceptor.clear_session(session.session_id)
+        detail_msg = "Internal pipeline evaluation error. Audit session aborted."
+        if settings.APP_ENV == "development":
+            detail_msg = f"Pipeline error: {exc}"
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Pipeline error: {exc}",
+            detail=detail_msg,
         ) from exc
 
     # ── 7. Translate engine outputs → Pydantic response ──────────────────────
-    return _build_analyze_response(event, session.session_id)
+    response = _build_analyze_response(event, session.session_id)
+    response_dict = jsonable_encoder(response)
+
+    # Broadcast final NEW_ANALYSIS payload
+    await ws_manager.broadcast({
+        "type": "NEW_ANALYSIS",
+        "data": response_dict
+    })
+
+    # Broadcast TRUST_UPDATE
+    await ws_manager.broadcast({
+        "type": "TRUST_UPDATE",
+        "agent_id": event.agent_id,
+        "trust": response_dict["trust"]
+    })
+
+    return response
 
 
 # ============================================================================

@@ -445,8 +445,19 @@ class BehaviorDNAEngine:
         _validate_agent_id(agent_id)
         with self._lock:
             profile = self._get_or_create(agent_id)
-            self._update_profile(profile, observation)
-            self._store_profile(profile)
+            
+            # Behavioral Poisoning Mitigation:
+            # Ignore suspicious or malicious observations during profile training
+            if observation.risk_score <= 0.30 and not observation.threat_categories:
+                self._update_profile(profile, observation)
+                self._store_profile(profile)
+            else:
+                # Still record count of requests, but do not shift average weights
+                profile.observations += 1
+                profile._last_timestamp = observation.timestamp
+                profile.last_updated = datetime.now(timezone.utc)
+                self._store_profile(profile)
+                
             return profile
 
     def analyze_behavior(

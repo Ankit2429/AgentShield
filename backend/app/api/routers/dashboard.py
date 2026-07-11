@@ -31,7 +31,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
-from app.api.deps import get_replay_engine, get_trust_engine
+from app.api.deps import get_replay_engine, get_trust_engine, require_roles
 from app.api.schemas import DashboardResponse, RecentDecisionItem
 from app.core.replay import ReplayEngine
 from app.core.replay.replay_models import SessionStatus
@@ -49,6 +49,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
     "",
     response_model=DashboardResponse,
     summary="Operational Dashboard Summary",
+    dependencies=[Depends(require_roles("Admin", "Security Analyst", "Viewer"))],
     description=(
         "Returns a live snapshot: active agents, session statistics, "
         "average trust score, and the 10 most recent security decisions."

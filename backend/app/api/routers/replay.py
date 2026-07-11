@@ -29,7 +29,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.deps import get_replay_engine
+from app.api.deps import get_replay_engine, require_roles
 from app.api.schemas import (
     FrameItem,
     ReplayListResponse,
@@ -51,6 +51,7 @@ router = APIRouter(prefix="/replay", tags=["Replay"])
     "",
     response_model=ReplayListResponse,
     summary="List Replay Sessions",
+    dependencies=[Depends(require_roles("Admin", "Security Analyst"))],
     description=(
         "Returns a list of replay sessions, optionally filtered by agent ID "
         "or session status."
@@ -113,6 +114,7 @@ def list_sessions(
     "/{session_id}",
     response_model=ReplaySessionResponse,
     summary="Get Replay Timeline",
+    dependencies=[Depends(require_roles("Admin", "Security Analyst"))],
     description="Returns the full ordered replay timeline for a single session.",
 )
 def get_session(

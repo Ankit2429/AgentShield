@@ -26,6 +26,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
+import re
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -101,6 +102,9 @@ class AnalyzeRequest(BaseModel):
           "metadata": {"session_id": "s-001"}
         }
     """
+    model_config = {
+        "extra": "forbid"
+    }
 
     agent_id: str = Field(..., min_length=1, max_length=256, description="Stable agent identifier.")
     message: str = Field(..., min_length=1, max_length=32_768, description="Raw agent message.")
@@ -403,3 +407,60 @@ class HealthResponse(BaseModel):
     version: str
     uptime_seconds: float
     engines: dict[str, str] = Field(default_factory=dict)
+
+
+# ============================================================================
+# Authentication Schemas
+# ============================================================================
+
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+
+
+class AuthLoginRequest(BaseModel):
+    """Request payload for logging in to the platform."""
+    model_config = {
+        "extra": "forbid"
+    }
+
+    email: str = Field(..., min_length=5, max_length=256, description="User email address.")
+    password: str = Field(..., min_length=8, max_length=128, description="User credential password.")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        stripped = v.strip().lower()
+        if not EMAIL_REGEX.match(stripped):
+            raise ValueError("Invalid email address format.")
+        return stripped
+
+
+class AuthRefreshRequest(BaseModel):
+    """Request payload for renewing access tokens."""
+    model_config = {
+        "extra": "forbid"
+    }
+
+    refresh_token: str = Field(..., description="Active Refresh JWT token.")
+
+
+class TokenResponse(BaseModel):
+    """Outbound payload returning valid session credentials."""
+    model_config = {
+        "extra": "forbid"
+    }
+
+    access_token: str = Field(..., description="Access token JWT.")
+    refresh_token: str = Field(..., description="Rotated refresh token JWT.")
+    token_type: str = Field("bearer", description="Token authentication schema scheme.")
+    expires_in: int = Field(900, description="Access token validity lifespan in seconds.")
+
+
+class UserMeResponse(BaseModel):
+    """Authenticated caller identification details."""
+    model_config = {
+        "extra": "forbid"
+    }
+
+    email: str = Field(..., description="User identifier.")
+    role: str = Field(..., description="Assigned authorization role (Admin, Analyst, Viewer).")
+
