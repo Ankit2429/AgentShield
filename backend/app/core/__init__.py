@@ -14,7 +14,13 @@ Usage::
     # Event bus
     from app.core import SecurityEvent, make_event, enrich, obs_from_event
     from app.core import EventStage, event_stage, to_audit_dict
+
+    # Attack Replay Engine
+    from app.core import ReplayEngine, TimelineBuilder, ReplaySession
+    from app.core import ReplayFrame, ReplayStage, SessionStatus
+    from app.core import session_to_json, session_from_json
 """
+
 
 # ── Engines ───────────────────────────────────────────────────────────────────
 from app.core.behavior_dna import (
@@ -57,6 +63,24 @@ from app.core.events import (
     to_audit_dict,
 )
 
+# ── Attack Replay Engine ───────────────────────────────────────────────────────────
+from app.core.replay import (
+    ReplayEngine,
+    ReplayFrame,
+    ReplaySession,
+    ReplayStage,
+    SessionStatus,
+    TimelineBuilder,
+    frame_from_dict,
+    frame_to_dict,
+    make_frame,
+    make_session,
+    session_from_dict,
+    session_from_json,
+    session_to_dict,
+    session_to_json,
+)
+
 __all__ = [
     # ── Detection Engine ──────────────────────────────────────────────────────
     "DetectionEngine",
@@ -94,4 +118,19 @@ __all__ = [
     "event_risk_score",
     "event_decision_value",
     "to_audit_dict",
+    # ── Attack Replay Engine ───────────────────────────────────────────────────────────
+    "ReplayEngine",
+    "TimelineBuilder",
+    "ReplayFrame",
+    "ReplaySession",
+    "ReplayStage",
+    "SessionStatus",
+    "make_frame",
+    "make_session",
+    "session_to_json",
+    "session_from_json",
+    "session_to_dict",
+    "session_from_dict",
+    "frame_to_dict",
+    "frame_from_dict",
 ]

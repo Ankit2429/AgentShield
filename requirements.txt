@@ -4,3 +4,4 @@ pydantic
 python-dotenv
 websockets
 pytest
+httpx2

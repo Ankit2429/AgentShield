@@ -1,86 +1,130 @@
-import React from 'react';
-import Dashboard from './components/Dashboard';
-import TrustGraph from './components/TrustGraph';
-import AlertPanel from './components/AlertPanel';
-import AgentList from './components/AgentList';
-import MessageFlow from './components/MessageFlow';
-import AuditLog from './components/AuditLog';
+import React, { useState, useEffect } from 'react';
+import { getHealth } from './services/api';
+import DashboardView from './components/DashboardView';
+import ReplayView from './components/ReplayView';
+import AgentsView from './components/AgentsView';
+import SandboxView from './components/SandboxView';
 
 export default function App() {
-  return (
-    <div className="relative min-h-screen bg-[#070b13] bg-radial-gradient text-slate-100 flex flex-col selection:bg-cyan-500/30">
-      
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none"></div>
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [healthStatus, setHealthStatus] = useState({ status: 'connecting', version: 'unknown', uptime_seconds: 0 });
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
 
-      {/* Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/40 backdrop-blur-md sticky top-0 z-50">
+  // Poll system health
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const data = await getHealth();
+        setHealthStatus(data);
+      } catch (err) {
+        setHealthStatus({ status: 'offline', version: 'unknown', uptime_seconds: 0 });
+      }
+    };
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const navigateToSession = (sessionId) => {
+    setSelectedSessionId(sessionId);
+    setActiveTab('replay');
+  };
+
+  return (
+    <div className="relative min-h-screen bg-[#080b11] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-white">
+      {/* Background glow effects - soft and subtle */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-violet-500/[0.02] rounded-full blur-3xl pointer-events-none"></div>
+
+      {/* Main Header */}
+      <header className="border-b border-slate-900 bg-[#0c101b]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-violet-500 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20">
-              AS
+          <div className="flex items-center space-x-8">
+            {/* Logo */}
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-cyan-500/10">
+                AS
+              </div>
+              <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                AgentShield X
+              </span>
             </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-              AgentShield
-            </span>
+
+            {/* Navigation Tabs */}
+            <nav className="flex items-center space-x-1">
+              {[
+                { id: 'dashboard', label: 'Overview' },
+                { id: 'replay', label: 'Incidents & Replay' },
+                { id: 'agents', label: 'Agent Profiles' },
+                { id: 'sandbox', label: 'Simulator Sandbox' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    if (tab.id !== 'replay') setSelectedSessionId(null);
+                  }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-slate-900 text-cyan-400 border border-slate-800'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs text-slate-400 font-mono">CORE STATUS: BOOTED</span>
+
+          {/* System Status Indicators */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-slate-950/60 border border-slate-900 rounded-full px-3.5 py-1">
+              <span className={`inline-block w-2 h-2 rounded-full ${
+                healthStatus.status === 'ok' 
+                  ? 'bg-emerald-500 animate-pulse' 
+                  : healthStatus.status === 'connecting' 
+                    ? 'bg-amber-500 animate-pulse' 
+                    : 'bg-rose-500'
+              }`}></span>
+              <span className="text-xs text-slate-400 font-mono tracking-tight uppercase">
+                {healthStatus.status === 'ok' ? 'SOC CONNECTED' : `SOC ${healthStatus.status.toUpperCase()}`}
+              </span>
+            </div>
+            {healthStatus.version !== 'unknown' && (
+              <span className="text-xs text-slate-500 font-mono hidden sm:inline">
+                v{healthStatus.version}
+              </span>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Main Layout (Blurred while coming soon) */}
-      <main className="max-w-7xl mx-auto px-6 py-8 w-full flex-grow relative">
-        
-        {/* Banner Overlay */}
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/40 backdrop-blur-[6px] rounded-3xl p-4">
-          <div className="p-8 md:p-12 max-w-lg w-full bg-gradient-to-b from-slate-900/90 to-slate-950/95 border border-slate-700/60 rounded-2xl shadow-2xl text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500"></div>
-            
-            <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-
-            <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
-              AgentShield Dashboard
-            </h1>
-            <p className="text-slate-400 font-medium mb-6 text-cyan-400/90">
-              Coming Soon
-            </p>
-            <p className="text-sm text-slate-400 leading-relaxed mb-8">
-              A comprehensive interceptor, analyzer, and trust dashboard mapping multi-agent safety metrics in real-time.
-            </p>
-            <div className="inline-flex items-center space-x-2 text-xs font-mono text-slate-500 border border-slate-800 rounded-full px-3 py-1 bg-slate-950/40">
-              <span>FastAPI Backend online</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Dashboard Grid Background preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 select-none opacity-40">
-          <div className="lg:col-span-2 space-y-6">
-            <Dashboard />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TrustGraph />
-              <MessageFlow />
-            </div>
-          </div>
-          <div className="space-y-6">
-            <AlertPanel />
-            <AgentList />
-            <AuditLog />
-          </div>
-        </div>
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-6 py-8 w-full flex-grow flex flex-col relative z-10">
+        {activeTab === 'dashboard' && (
+          <DashboardView onNavigateToSession={navigateToSession} />
+        )}
+        {activeTab === 'replay' && (
+          <ReplayView sessionId={selectedSessionId} onSelectSessionId={setSelectedSessionId} />
+        )}
+        {activeTab === 'agents' && (
+          <AgentsView />
+        )}
+        {activeTab === 'sandbox' && (
+          <SandboxView onNavigateToSession={navigateToSession} />
+        )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900/60 bg-slate-950/20 py-6 text-center text-xs text-slate-500 font-mono">
-        &copy; {new Date().getFullYear()} AgentShield. All rights reserved.
+      <footer className="border-t border-slate-900/60 bg-[#0a0d15]/50 py-6">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 font-mono">
+          <span>&copy; {new Date().getFullYear()} AgentShield X. All rights reserved.</span>
+          <div className="flex space-x-4 mt-2 md:mt-0">
+            <span>Detections: ACTIVE</span>
+            <span>DNA Engine: CALIBRATED</span>
+            <span>Uptime: {healthStatus.uptime_seconds ? `${Math.round(healthStatus.uptime_seconds)}s` : '0s'}</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
