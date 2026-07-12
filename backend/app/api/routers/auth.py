@@ -50,10 +50,12 @@ def verify_password(plain_password: str, salt: bytes, hashed_key: bytes) -> bool
     return hmac.compare_digest(new_key, hashed_key)
 
 
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
 @router.post("/login", response_model=TokenResponse)
-async def login(payload: AuthLoginRequest) -> dict[str, Any]:
+async def login(payload: OAuth2PasswordRequestForm = Depends()) -> dict[str, Any]:
     """Authenticate credentials and return a secure access/refresh token pair."""
-    email = payload.email.lower().strip()
+    email = payload.username.lower().strip()
     user = USER_DB.get(email)
 
     if not user or not verify_password(payload.password, user["salt"], user["key"]):

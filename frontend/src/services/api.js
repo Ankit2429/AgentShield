@@ -101,7 +101,15 @@ api.interceptors.response.use(
  * Log in to the backend platform.
  */
 export const loginUser = async (email, password) => {
-  const response = await api.post('/auth/login', { email, password });
+  const formData = new URLSearchParams();
+  formData.append('username', email);
+  formData.append('password', password);
+  
+  const response = await api.post('/auth/login', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
   const { access_token, refresh_token } = response.data;
   localStorage.setItem('access_token', access_token);
   localStorage.setItem('refresh_token', refresh_token);
