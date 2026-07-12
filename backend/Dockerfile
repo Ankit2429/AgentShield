@@ -1,21 +1,22 @@
 FROM python:3.11-slim
 
-# Create a non-root user
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# Create non-root user with home directory
+RUN groupadd -r appgroup && \
+    useradd -m -r -g appgroup appuser
 
 WORKDIR /app
 
-# Install dependencies first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
-# Copy the backend source
-COPY --chown=appuser:appgroup . .
+COPY . .
 
-# Switch to non-root user
+RUN chown -R appuser:appgroup /app
+
 USER appuser
 
-EXPOSE 8000 10000
+ENV HOME=/home/appuser
 
-# Run with Gunicorn and Uvicorn workers for production readiness
-CMD sh -c "gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000}"
+EXPOSE 8000
+
+CMD ["gunicorn", "app.main:app", "--workers", "2", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${PORT}"]
