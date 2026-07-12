@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getHealth, loginUser, logoutUser, getCurrentUser } from './services/api';
 import DashboardView from './components/DashboardView';
 import ReplayView from './components/ReplayView';
@@ -6,6 +6,21 @@ import AgentsView from './components/AgentsView';
 import ThreatsView from './components/ThreatsView';
 import SettingsView from './components/SettingsView';
 import SandboxView from './components/SandboxView';
+import {
+  LayoutDashboard,
+  ShieldAlert,
+  PlayCircle,
+  Bot,
+  Settings,
+  Shield,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ChevronDown,
+  LogOut
+} from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -17,8 +32,11 @@ export default function App() {
   // Login form state
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(null);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   // Poll system health
   useEffect(() => {
@@ -33,6 +51,17 @@ export default function App() {
     fetchHealth();
     const interval = setInterval(fetchHealth, 15000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Click outside to close user profile dropdown
+  useEffect(() => {
+    function handleClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   // Bootstrap user session and monitor credentials revocation events
@@ -120,38 +149,12 @@ export default function App() {
 
   // Role-Based Navigation Configuration
   const allTabs = [
-    { id: 'dashboard', label: 'Command Overview', minRole: 'Viewer', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
-      </svg>
-    )},
-    { id: 'threats', label: 'Threat Investigation', minRole: 'Viewer', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    )},
-    { id: 'replay', label: 'Incident Replay', minRole: 'Security Analyst', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    )},
-    { id: 'agents', label: 'Fleet Status', minRole: 'Viewer', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    )},
-    { id: 'sandbox', label: 'Sandbox Simulator', minRole: 'Security Analyst', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-      </svg>
-    )},
-    { id: 'settings', label: 'Settings', minRole: 'Admin', icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    )}
+    { id: 'dashboard', label: 'Command Overview', minRole: 'Viewer', icon: LayoutDashboard },
+    { id: 'threats', label: 'Threat Investigation', minRole: 'Viewer', icon: ShieldAlert },
+    { id: 'replay', label: 'Incident Replay', minRole: 'Security Analyst', icon: PlayCircle },
+    { id: 'agents', label: 'Fleet Status', minRole: 'Viewer', icon: Bot },
+    { id: 'sandbox', label: 'Sandbox Simulator', minRole: 'Security Analyst', icon: ShieldAlert },
+    { id: 'settings', label: 'Settings', minRole: 'Admin', icon: Settings }
   ];
 
   const visibleTabs = allTabs.filter(tab => {
@@ -165,9 +168,9 @@ export default function App() {
   // Render a clean bootstrap spinner during active validation checks
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center font-sans antialiased">
-        <div className="w-6 h-6 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin mb-4"></div>
-        <p className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">Validating Security Session...</p>
+      <div className="min-h-screen text-foreground flex flex-col items-center justify-center font-sans antialiased" style={{ background: '#03045E' }}>
+        <div className="w-8 h-8 rounded-full border-2 animate-spin mb-4" style={{ borderColor: 'rgba(254,250,224,0.08)', borderTopColor: '#4361EE' }}></div>
+        <p className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'rgba(254,250,224,0.35)' }}>Validating Security Session...</p>
       </div>
     );
   }
@@ -175,190 +178,311 @@ export default function App() {
   // Render Auth Login overlay if session context is missing
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center font-sans antialiased selection:bg-indigo-500/30 selection:text-white p-4">
-        <div className="w-full max-w-md bg-[#0c0c0e] rounded border border-zinc-900 p-8 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="inline-block w-10 h-10 rounded bg-zinc-800 flex items-center justify-center font-bold text-base text-zinc-100 border border-zinc-700 shadow-inner mb-2">
-              S
+      <div className="min-h-screen flex" style={{ background: '#03045E' }}>
+        {/* Left Panel - Login Form */}
+        <div className="w-full lg:w-[45%] flex flex-col justify-center items-center px-8 relative" style={{ background: '#03045E' }}>
+          <div className="absolute inset-0 opacity-30" style={{
+            background: 'radial-gradient(ellipse at 20% 50%, rgba(67,97,238,0.15) 0%, transparent 70%)'
+          }} />
+
+          <div className="relative w-full max-w-[400px]">
+            {/* Wordmark (Shield logo removed per requirements) */}
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="text-2xl font-bold tracking-tight" style={{ color: '#FEFAE0', fontWeight: 700, letterSpacing: '-0.015em' }}>
+                AgentShield
+              </span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-100">AgentShield X</h1>
-            <p className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">Enterprise Security Operations Hub</p>
+            <p className="text-sm mb-10" style={{ color: 'rgba(254,250,224,0.6)' }}>
+              AI Security Intelligence Platform
+            </p>
+
+            {/* Form */}
+            <h1 className="text-4xl font-bold tracking-tight" style={{ color: '#FEFAE0', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              Welcome back
+            </h1>
+            <p className="text-sm mt-2 mb-8" style={{ color: 'rgba(254,250,224,0.6)' }}>
+              Sign in to your security operations center
+            </p>
+
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              {loginError && (
+                <p className="text-xs" style={{ color: '#E07A5F' }}>{loginError}</p>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-medium tracking-wide mb-1.5" style={{ color: 'rgba(254,250,224,0.6)', letterSpacing: '0.04em' }}>
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                  <input
+                    type="email"
+                    required
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full h-11 rounded-lg pl-10 pr-4 text-sm outline-none transition-all duration-150 focus:ring-2"
+                    style={{
+                      background: '#181D4A',
+                      border: '1px solid rgba(254,250,224,0.08)',
+                      color: '#FEFAE0',
+                      fontSize: '14px',
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium tracking-wide mb-1.5" style={{ color: 'rgba(254,250,224,0.6)', letterSpacing: '0.04em' }}>
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full h-11 rounded-lg pl-10 pr-10 text-sm outline-none transition-all duration-150"
+                    style={{
+                      background: '#181D4A',
+                      border: '1px solid rgba(254,250,224,0.08)',
+                      color: '#FEFAE0',
+                      fontSize: '14px',
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    style={{ color: 'rgba(254,250,224,0.35)' }}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border cursor-pointer"
+                    style={{ accentColor: '#4361EE', borderColor: 'rgba(254,250,224,0.08)' }}
+                  />
+                  <span className="text-[13px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Remember me</span>
+                </label>
+                <button type="button" className="text-[13px] transition-colors hover:underline" style={{ color: '#4361EE' }}>
+                  Forgot password?
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full h-12 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                style={{
+                  background: '#4361EE',
+                  color: '#FFFFFF',
+                  boxShadow: '0 4px 12px rgba(67,97,238,0.3)',
+                }}
+                onMouseEnter={(e) => { if (!loginLoading) e.currentTarget.style.background = '#5A75F0'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#4361EE'; }}
+              >
+                {loginLoading ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
           </div>
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            {loginError && (
-              <div className="p-3 rounded text-[11px] font-mono border border-rose-500/20 bg-rose-500/10 text-rose-400">
-                {loginError}
-              </div>
-            )}
+          <p className="absolute bottom-6 left-8 text-[11px]" style={{ color: 'rgba(254,250,224,0.35)', letterSpacing: '0.04em' }}>
+            &copy; 2026 AgentShield. All rights reserved.
+          </p>
+        </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase block">Email Address</label>
-              <input
-                type="email"
-                required
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="analyst@agentshield.com"
-                className="w-full px-3 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded text-xs text-zinc-200 placeholder-zinc-650 focus:outline-none focus:border-zinc-700 font-mono transition duration-150"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase block">Security Password</label>
-              <input
-                type="password"
-                required
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full px-3 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded text-xs text-zinc-200 placeholder-zinc-650 focus:outline-none focus:border-zinc-700 font-mono transition duration-150"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full py-2.5 bg-zinc-100 hover:bg-zinc-200 disabled:opacity-50 text-zinc-950 text-xs font-bold rounded shadow transition duration-150 flex justify-center items-center mt-6"
-            >
-              <span>{loginLoading ? 'Authenticating credentials...' : 'Access Command Deck'}</span>
-            </button>
-          </form>
-
-          <div className="border-t border-zinc-900/60 pt-4 space-y-2">
-            <h3 className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase">Preconfigured SOC Accounts:</h3>
-            <div className="grid grid-cols-1 gap-1.5 text-[10px] font-mono text-zinc-400">
-              <div className="flex justify-between items-center bg-zinc-900/30 rounded p-1.5 border border-zinc-900/60">
-                <span>Admin: <strong className="text-zinc-300 font-bold">admin@agentshield.com</strong></span>
-                <span className="text-[9px] bg-zinc-800 px-1 py-0.5 rounded text-zinc-500 uppercase">Full privileges</span>
-              </div>
-              <div className="flex justify-between items-center bg-zinc-900/30 rounded p-1.5 border border-zinc-900/60">
-                <span>Security Analyst: <strong className="text-zinc-300 font-bold">analyst@agentshield.com</strong></span>
-                <span className="text-[9px] bg-zinc-800 px-1 py-0.5 rounded text-zinc-500 uppercase">Read / Write</span>
-              </div>
-              <div className="flex justify-between items-center bg-zinc-900/30 rounded p-1.5 border border-zinc-900/60">
-                <span>Viewer: <strong className="text-zinc-300 font-bold">viewer@agentshield.com</strong></span>
-                <span className="text-[9px] bg-zinc-800 px-1 py-0.5 rounded text-zinc-500 uppercase">Read-only</span>
-              </div>
-            </div>
-            <p className="text-[9px] text-zinc-600 text-center italic mt-2">Passwords are standard format: [role]-password (e.g. analyst-password)</p>
+        {/* Right Panel - Visual */}
+        <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center overflow-hidden" style={{ background: '#03045E' }}>
+          {/* Animated gradient orbs */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20" style={{
+              background: 'radial-gradient(circle, #4361EE 0%, transparent 70%)',
+              animation: 'pulse-glow 4s ease-in-out infinite',
+              filter: 'blur(60px)',
+            }} />
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-15" style={{
+              background: 'radial-gradient(circle, #4CC9F0 0%, transparent 70%)',
+              animation: 'pulse-glow 5s ease-in-out infinite 1s',
+              filter: 'blur(50px)',
+            }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10" style={{
+              background: 'radial-gradient(circle, #D4AF37 0%, transparent 70%)',
+              animation: 'pulse-glow 6s ease-in-out infinite 2s',
+              filter: 'blur(80px)',
+            }} />
           </div>
+
+          {/* Central sphere representation */}
+          <div className="relative">
+            <div className="w-48 h-48 rounded-full relative" style={{
+              background: 'radial-gradient(circle at 35% 35%, #C0C0C8, #4a4a5a, #1a1a2e)',
+              boxShadow: '0 0 60px rgba(67,97,238,0.2), inset 0 0 40px rgba(255,255,255,0.1)',
+              animation: 'pulse-glow 3s ease-in-out infinite',
+            }}>
+              <div className="absolute inset-4 rounded-full" style={{
+                background: 'radial-gradient(circle at 40% 30%, rgba(192,192,200,0.6), transparent 60%)',
+              }} />
+            </div>
+            {/* Orbiting ring */}
+            <div className="absolute inset-0 -m-8" style={{
+              border: '1px solid rgba(67,97,238,0.15)',
+              borderRadius: '50%',
+              animation: 'spin-slow 20s linear infinite',
+            }}>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: '#4361EE', boxShadow: '0 0 8px rgba(67,97,238,0.5)' }} />
+            </div>
+            <div className="absolute inset-0 -m-16" style={{
+              border: '1px solid rgba(76,201,240,0.1)',
+              borderRadius: '50%',
+              animation: 'spin-slow 30s linear infinite reverse',
+            }} />
+          </div>
+
+          <p className="absolute bottom-[15%] left-1/2 -translate-x-1/2 text-center text-[11px] font-medium tracking-[0.1em] uppercase whitespace-nowrap" style={{ color: 'rgba(254,250,224,0.25)' }}>
+            Protecting AI interactions across enterprise infrastructure
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex font-sans antialiased selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen flex font-sans antialiased text-foreground bg-background">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-[#0c0c0e] border-r border-zinc-900 flex flex-col justify-between fixed h-screen z-40">
-        <div>
-          {/* Logo & Product Identity */}
-          <div className="px-6 py-6 border-b border-zinc-900/60 flex items-center justify-between">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-              <div className="w-7 h-7 rounded bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-100 border border-zinc-700">
-                S
-              </div>
-              <span className="text-sm font-bold tracking-tight text-zinc-200">
-                AgentShield X
-              </span>
-            </div>
-            <span className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 uppercase tracking-widest">
-              SOC
+      <aside className="fixed left-0 top-0 h-screen w-[240px] flex flex-col z-40" style={{ background: '#03045E', borderRight: '1px solid rgba(254,250,224,0.08)' }}>
+        {/* Logo */}
+        <div className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-5 h-5" style={{ color: '#4361EE' }} />
+            <span className="text-lg font-bold tracking-tight" style={{ color: '#FEFAE0', fontSize: '18px', fontWeight: 700, letterSpacing: '-0.01em' }}>
+              AgentShield
             </span>
           </div>
+          <p style={{ color: 'rgba(254,250,224,0.35)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em', marginTop: '2px' }}>
+            AI Security Intelligence
+          </p>
+        </div>
 
-          {/* Navigation Links */}
-          <nav className="p-4 space-y-1.5 mt-2">
-            {visibleTabs.map(tab => (
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
+          {visibleTabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
               <button
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id);
                   if (tab.id !== 'replay') setSelectedSessionId(null);
                 }}
-                className={`w-full flex items-center space-x-3 px-3 py-2 text-xs font-medium rounded transition-all duration-150 ${
-                  activeTab === tab.id
-                    ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80 shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/30'
+                className={`flex items-center gap-3 px-3 w-full h-10 rounded-lg transition-all duration-150 text-[13px] font-medium tracking-wide text-left ${
+                  isActive ? 'text-[#4361EE]' : 'hover:text-[#FEFAE0]'
                 }`}
+                style={{
+                  background: isActive ? 'rgba(67, 97, 238, 0.12)' : 'transparent',
+                  color: isActive ? '#4361EE' : 'rgba(254, 250, 224, 0.6)',
+                }}
               >
-                <span className={`${activeTab === tab.id ? 'text-indigo-400' : 'text-zinc-500'}`}>{tab.icon}</span>
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
                 <span>{tab.label}</span>
               </button>
-            ))}
-          </nav>
-        </div>
+            );
+          })}
+        </nav>
 
-        {/* Footer info & Telemetry */}
-        <div className="p-4 border-t border-zinc-900/60 bg-[#0a0a0c]/80 text-[10px] text-zinc-500 font-mono space-y-2">
-          <div className="flex justify-between items-center">
-            <span>Uptime:</span>
-            <span className="text-zinc-400">{healthStatus.uptime_seconds ? `${Math.round(healthStatus.uptime_seconds)}s` : '0s'}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Engine API:</span>
-            <span className={`flex items-center space-x-1 ${healthStatus.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'}`}>
-              <span className={`w-1 h-1 rounded-full ${healthStatus.status === 'ok' ? 'bg-emerald-500' : 'bg-rose-500'} inline-block`}></span>
-              <span>{healthStatus.status === 'ok' ? 'CONNECTED' : 'DISCONNECTED'}</span>
-            </span>
-          </div>
-          {healthStatus.version !== 'unknown' && (
-            <div className="text-[9px] text-zinc-600 border-t border-zinc-900/40 pt-1.5 flex justify-between">
-              <span>Platform Version:</span>
-              <span>v{healthStatus.version}</span>
+        {/* User Section */}
+        <div className="px-3 pb-4 relative" ref={menuRef}>
+          <button
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg transition-all duration-150 hover:bg-white/[0.03]"
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(67, 97, 238, 0.2)', color: '#4361EE' }}>
+              {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
+            </div>
+            <div className="flex-1 text-left overflow-hidden">
+              <p className="text-xs font-medium truncate" style={{ color: '#FEFAE0' }}>{currentUser.email}</p>
+            </div>
+            <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(254,250,224,0.35)' }} />
+          </button>
+
+          {userMenuOpen && (
+            <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg overflow-hidden z-50" style={{ background: '#111640', border: '1px solid rgba(254,250,224,0.08)', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
+              <button
+                onClick={() => { setActiveTab('settings'); setUserMenuOpen(false); }}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs w-full text-left transition-colors hover:bg-white/[0.03]"
+                style={{ color: 'rgba(254,250,224,0.6)' }}
+              >
+                <Settings className="w-4 h-4" /> Settings
+              </button>
+              <button
+                onClick={() => { handleLogout(); setUserMenuOpen(false); }}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs w-full text-left transition-colors hover:bg-white/[0.03]"
+                style={{ color: '#E07A5F' }}
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
             </div>
           )}
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 pl-64 flex flex-col min-h-screen relative bg-[#09090b]">
+      <div className="flex-grow pl-[240px] flex flex-col min-h-screen relative">
         {/* Top Header */}
-        <header className="h-16 border-b border-zinc-900 bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-8">
+        <header className="sticky top-0 h-14 flex items-center justify-between px-6 z-30 border-b border-border" style={{ background: 'rgba(3,4,94,0.8)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center space-x-3">
-            <span className="text-xs font-mono font-bold tracking-widest text-zinc-500 uppercase">SYS_TAB /</span>
-            <h2 className="text-sm font-bold text-zinc-100 tracking-tight">{getTabLabel(activeTab)}</h2>
+            <span className="text-xs font-mono font-bold tracking-widest uppercase" style={{ color: 'rgba(254, 250, 224, 0.35)' }}>SYS_TAB /</span>
+            <h2 className="text-sm font-bold tracking-tight" style={{ color: '#FEFAE0' }}>{getTabLabel(activeTab)}</h2>
           </div>
 
           <div className="flex items-center space-x-4">
             {/* API Status Indicator */}
-            <div className="flex items-center space-x-2 bg-zinc-900/40 border border-zinc-800/80 rounded px-2.5 py-1">
+            <div className="flex items-center space-x-2 rounded px-2.5 py-1" style={{ background: 'rgba(254,250,224,0.03)', border: '1px solid rgba(254,250,224,0.08)' }}>
               <span className={`inline-block w-1.5 h-1.5 rounded-full ${
                 healthStatus.status === 'ok' 
-                  ? 'bg-emerald-500' 
+                  ? 'bg-[#2A9D8F]' 
                   : healthStatus.status === 'connecting' 
-                    ? 'bg-amber-500 animate-pulse' 
-                    : 'bg-rose-500'
+                    ? 'bg-[#F4A261] animate-pulse' 
+                    : 'bg-[#E07A5F]'
               }`}></span>
-              <span className="text-[10px] text-zinc-400 font-mono tracking-tight uppercase">
+              <span className="text-[10px] font-mono tracking-tight uppercase" style={{ color: 'rgba(254, 250, 224, 0.6)' }}>
                 {healthStatus.status === 'ok' ? 'nominal' : healthStatus.status}
               </span>
             </div>
 
-            {/* User Profile Info & Logout */}
+            {/* User Profile Info Badge */}
             {currentUser && (
-              <div className="flex items-center space-x-3 text-xs border-l border-zinc-800 pl-4">
-                <span className="text-zinc-400 font-mono">{currentUser.email}</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 uppercase">
+              <div className="flex items-center space-x-3 text-xs border-l border-white/10 pl-4">
+                <span className="font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>{currentUser.email}</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide uppercase" style={{ background: 'rgba(67, 97, 238, 0.15)', border: '1px solid rgba(67, 97, 238, 0.25)', color: '#4361EE' }}>
                   {currentUser.role}
                 </span>
-                <button
-                  onClick={handleLogout}
-                  className="text-zinc-550 hover:text-zinc-350 hover:bg-zinc-900/60 p-1.5 rounded transition duration-150 flex items-center justify-center"
-                  title="Sign out"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
               </div>
             )}
           </div>
         </header>
 
         {/* Viewport wrapper */}
-        <main className="flex-grow p-8 flex flex-col relative">
+        <main className="flex-grow p-6 flex flex-col relative bg-background">
           {activeTab === 'dashboard' && (
             <DashboardView onNavigateToSession={navigateToSession} />
           )}

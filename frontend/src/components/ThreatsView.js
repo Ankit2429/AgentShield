@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getReplays } from '../services/api';
+import {
+  Search,
+  Shield,
+  ChevronDown,
+  RefreshCw,
+  AlertTriangle,
+  AlertCircle,
+  PlayCircle
+} from 'lucide-react';
 
 export default function ThreatsView({ onNavigateToSession }) {
   const [sessions, setSessions] = useState([]);
@@ -40,20 +49,20 @@ export default function ThreatsView({ onNavigateToSession }) {
   }, [searchQuery]);
 
   const getSeverity = (risk) => {
-    if (risk === null || risk === undefined) return { label: 'LOW', color: 'text-zinc-500 bg-zinc-900 border border-zinc-800/80' };
-    if (risk >= 0.8) return { label: 'CRITICAL', color: 'text-rose-400 bg-rose-500/10 border border-rose-500/20' };
-    if (risk >= 0.6) return { label: 'HIGH', color: 'text-orange-400 bg-orange-500/10 border border-orange-500/20' };
-    if (risk >= 0.4) return { label: 'MEDIUM', color: 'text-amber-400 bg-amber-500/10 border border-amber-500/20' };
-    return { label: 'LOW', color: 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' };
+    if (risk === null || risk === undefined) return { label: 'LOW', color: 'text-zinc-450 bg-zinc-900 border border-white/[0.04]' };
+    if (risk >= 0.8) return { label: 'CRITICAL', color: 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20' };
+    if (risk >= 0.6) return { label: 'HIGH', color: 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20' };
+    if (risk >= 0.4) return { label: 'MEDIUM', color: 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20' };
+    return { label: 'LOW', color: 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20' };
   };
 
   const getVerdictStyle = (decision) => {
-    if (!decision) return 'text-zinc-500 border border-zinc-900 bg-zinc-950';
+    if (!decision) return 'text-zinc-550 border border-white/[0.04] bg-white/[0.01]';
     const uppercase = decision.toUpperCase();
-    if (uppercase === 'BLOCK') return 'text-rose-400 bg-rose-500/10 border border-rose-500/20';
-    if (uppercase === 'QUARANTINE') return 'text-orange-400 bg-orange-500/10 border border-orange-500/20';
-    if (uppercase === 'REVIEW') return 'text-amber-400 bg-amber-500/10 border border-amber-500/20';
-    return 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20';
+    if (uppercase === 'BLOCK') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
+    if (uppercase === 'QUARANTINE') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
+    if (uppercase === 'REVIEW') return 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20';
+    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
   };
 
   // Filter based on selected UI dropdowns
@@ -83,26 +92,34 @@ export default function ThreatsView({ onNavigateToSession }) {
   const highestRisk = sessions.length > 0 ? Math.max(...sessions.map(s => s.peak_risk_score || 0)) : 0;
 
   return (
-    <div className="space-y-8 flex-grow flex flex-col">
+    <div className="space-y-6 flex-grow flex flex-col">
       {/* View Header */}
-      <div className="flex justify-between items-center border-b border-zinc-900/60 pb-5">
+      <div className="flex justify-between items-center border-b border-border pb-5">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-100">Threat Investigation Desk</h1>
-          <p className="text-xs text-zinc-400 mt-1">Audit log of anomalous transactions and agent command bypasses requiring analysis.</p>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: '#FEFAE0', fontWeight: 600, letterSpacing: '-0.015em' }}>
+            Threat Investigation Desk
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'rgba(254,250,224,0.6)' }}>
+            Audit log of anomalous transactions and agent command bypasses requiring analysis.
+          </p>
         </div>
         <button
           onClick={fetchThreats}
-          className="px-3 py-1.5 text-xs font-medium bg-zinc-900 border border-zinc-800/80 rounded hover:text-zinc-100 hover:bg-zinc-800/60 transition"
+          className="px-3.5 py-2 text-xs font-medium rounded-lg transition-all duration-150 hover:bg-white/[0.03] flex items-center gap-1.5"
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(254,250,224,0.08)',
+            color: '#FEFAE0'
+          }}
         >
+          <RefreshCw className="w-3.5 h-3.5" />
           Re-evaluate Threats
         </button>
       </div>
 
       {error && (
-        <div className="p-3 bg-rose-950/20 border border-rose-900/40 rounded text-rose-400 text-xs flex items-center space-x-2.5">
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+        <div className="p-4 bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-xl text-[#E07A5F] text-xs flex items-center space-x-2.5">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -110,89 +127,111 @@ export default function ThreatsView({ onNavigateToSession }) {
       {/* Threats Telemetry */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Identified Threats', value: sessions.length, desc: 'Flagged transactions' },
-          { label: 'Critical Severity', value: criticalCount, desc: 'Risk score >= 0.80', highlight: criticalCount > 0 },
-          { label: 'Active Blocks', value: blockedCount, desc: 'Enforced blockade rules', highlight: blockedCount > 0 },
-          { label: 'Peak Fleet Risk', value: highestRisk.toFixed(3), desc: 'Max interception threat' }
+          { label: 'Identified Threats', value: sessions.length, desc: 'Flagged transactions', color: '#4CC9F0' },
+          { label: 'Critical Severity', value: criticalCount, desc: 'Risk score >= 0.80', color: '#E07A5F', highlight: criticalCount > 0 },
+          { label: 'Active Blocks', value: blockedCount, desc: 'Enforced blockade rules', color: '#F4A261', highlight: blockedCount > 0 },
+          { label: 'Peak Fleet Risk', value: highestRisk.toFixed(3), desc: 'Max interception threat', color: '#2A9D8F' }
         ].map((item, idx) => (
-          <div key={idx} className="bg-[#0c0c0e] border border-zinc-900/80 rounded p-4 flex flex-col justify-between hover:border-zinc-850 transition duration-150">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-zinc-500">{item.label}</span>
-            <div className="mt-2.5 flex items-baseline justify-between">
-              <span className={`text-lg font-bold tracking-tight ${item.highlight ? 'text-rose-400' : 'text-zinc-100'}`}>
+          <div key={idx} className="card-surface p-5 card-surface-hover flex flex-col justify-between">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.label}</span>
+            <div className="mt-4 flex items-baseline justify-between">
+              <span className={`text-2xl font-semibold tracking-tight ${item.highlight ? 'text-[#E07A5F]' : ''}`} style={{ color: !item.highlight ? '#FEFAE0' : undefined, fontWeight: 600 }}>
                 {loading ? '...' : item.value}
               </span>
-              <span className="text-[9px] font-mono text-zinc-650">{item.desc}</span>
+              <span className="text-[9px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.desc}</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 p-4 bg-[#0c0c0e] rounded border border-zinc-900/80">
+      <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search threats by Agent ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-zinc-950 border border-zinc-900 rounded text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-800 transition font-mono"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-lg outline-none border transition-all"
+            style={{
+              background: '#0c0c0e',
+              border: '1px solid rgba(254,250,224,0.08)',
+              color: '#FEFAE0',
+              fontFamily: 'monospace'
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
           />
-          <svg className="w-4 h-4 text-zinc-650 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <Search className="w-4 h-4 absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} />
         </div>
 
         <div className="flex gap-3">
-          <select
-            value={severityFilter}
-            onChange={(e) => setSeverityFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-zinc-950 border border-zinc-900 rounded text-zinc-300 focus:outline-none focus:border-zinc-800 transition font-mono"
-          >
-            <option value="ALL">All Severities</option>
-            <option value="CRITICAL">Critical (&gt;= 0.8)</option>
-            <option value="HIGH">High (0.6 - 0.8)</option>
-            <option value="MEDIUM">Medium (0.4 - 0.6)</option>
-            <option value="LOW">Low (&lt; 0.4)</option>
-          </select>
+          <div className="relative">
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono"
+              style={{
+                background: '#0c0c0e',
+                border: '1px solid rgba(254,250,224,0.08)',
+                color: '#FEFAE0'
+              }}
+            >
+              <option value="ALL">All Severities</option>
+              <option value="CRITICAL">Critical (&gt;= 0.8)</option>
+              <option value="HIGH">High (0.6 - 0.8)</option>
+              <option value="MEDIUM">Medium (0.4 - 0.6)</option>
+              <option value="LOW">Low (&lt; 0.4)</option>
+            </select>
+            <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+          </div>
 
-          <select
-            value={verdictFilter}
-            onChange={(e) => setVerdictFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-zinc-950 border border-zinc-900 rounded text-zinc-300 focus:outline-none focus:border-zinc-800 transition font-mono"
-          >
-            <option value="ALL">All Actions</option>
-            <option value="BLOCKED">Blocked</option>
-            <option value="QUARANTINED">Quarantined</option>
-            <option value="REVIEW">Under Review</option>
-          </select>
+          <div className="relative">
+            <select
+              value={verdictFilter}
+              onChange={(e) => setVerdictFilter(e.target.value)}
+              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono"
+              style={{
+                background: '#0c0c0e',
+                border: '1px solid rgba(254,250,224,0.08)',
+                color: '#FEFAE0'
+              }}
+            >
+              <option value="ALL">All Actions</option>
+              <option value="BLOCKED">Blocked</option>
+              <option value="QUARANTINED">Quarantined</option>
+              <option value="REVIEW">Under Review</option>
+            </select>
+            <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+          </div>
         </div>
       </div>
 
       {/* Threats Data Grid */}
-      <div className="bg-[#0c0c0e] rounded border border-zinc-900/80 overflow-hidden shadow-sm flex-grow">
+      <div className="card-surface overflow-hidden flex-grow">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-zinc-900/80 bg-[#09090b]/40 text-zinc-500 font-medium">
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Threat ID</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Agent ID</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Severity</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Peak Risk</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Enforcement</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase">Intercepted At</th>
-                <th className="px-5 py-3 text-right font-mono text-[10px] uppercase">Action</th>
+              <tr className="border-b border-border bg-white/[0.01]" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Threat ID</th>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Agent ID</th>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Severity</th>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Peak Risk</th>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Enforcement</th>
+                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Intercepted At</th>
+                <th className="px-5 py-3 text-right font-mono text-[10px] uppercase font-medium">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900/60 font-mono text-[11px]">
+            <tbody className="divide-y divide-white/[0.04] font-mono text-[11px]">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-5 py-12 text-center text-zinc-500">
+                  <td colSpan="7" className="px-5 py-12 text-center" style={{ color: 'rgba(254,250,224,0.35)' }}>
                     Querying security engines for threat events...
                   </td>
                 </tr>
               ) : filteredSessions.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-5 py-12 text-center text-zinc-500 italic">
+                  <td colSpan="7" className="px-5 py-12 text-center italic" style={{ color: 'rgba(254,250,224,0.35)' }}>
                     No matching threat vectors logged. Run simulations to generate threats.
                   </td>
                 </tr>
@@ -203,32 +242,32 @@ export default function ThreatsView({ onNavigateToSession }) {
                     <tr 
                       key={session.session_id}
                       onClick={() => onNavigateToSession(session.session_id)}
-                      className="hover:bg-zinc-900/30 transition cursor-pointer group"
+                      className="hover:bg-white/[0.02] transition cursor-pointer group"
                     >
-                      <td className="px-5 py-3 text-zinc-400">
+                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.6)' }}>
                         {session.session_id.substring(0, 8)}
                       </td>
-                      <td className="px-5 py-3 text-zinc-200 font-sans font-medium">
+                      <td className="px-5 py-3 font-sans font-medium" style={{ color: '#FEFAE0' }}>
                         {session.agent_id}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded uppercase ${severity.color}`}>
+                        <span className={`px-2.5 py-0.5 text-[9px] font-bold rounded-md uppercase ${severity.color}`}>
                           {severity.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-zinc-300">
+                      <td className="px-5 py-3" style={{ color: '#FEFAE0' }}>
                         {session.peak_risk_score !== null ? session.peak_risk_score.toFixed(3) : '0.000'}
                       </td>
                       <td className="px-5 py-3 font-sans">
-                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded uppercase ${getVerdictStyle(session.final_decision)}`}>
+                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-md uppercase ${getVerdictStyle(session.final_decision)}`}>
                           {session.final_decision || 'PENDING'}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-zinc-500">
+                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.35)' }}>
                         {new Date(session.started_at).toLocaleString()}
                       </td>
                       <td className="px-5 py-3 text-right">
-                        <span className="text-[10px] text-zinc-400 group-hover:text-indigo-400 border border-transparent group-hover:border-indigo-500/20 group-hover:bg-indigo-500/5 px-2 py-0.5 rounded transition">
+                        <span className="text-[10px] group-hover:text-[#4361EE] border border-transparent group-hover:border-[#4361EE]/20 group-hover:bg-[#4361EE]/5 px-2 py-0.5 rounded transition" style={{ color: 'rgba(254,250,224,0.35)' }}>
                           Triage Incident &rarr;
                         </span>
                       </td>
