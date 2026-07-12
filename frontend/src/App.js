@@ -78,7 +78,18 @@ export default function App() {
       setPasswordInput('');
     } catch (err) {
       console.error('[AUTH] Login failed:', err);
-      setLoginError(err.response?.data?.detail || 'Authentication failed. Please verify credentials.');
+      let errorMessage = 'Authentication failed. Please verify credentials.';
+      const detail = err.response?.data?.detail;
+      if (detail) {
+        if (Array.isArray(detail)) {
+          errorMessage = detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+        } else if (typeof detail === 'string') {
+          errorMessage = detail;
+        } else {
+          errorMessage = JSON.stringify(detail);
+        }
+      }
+      setLoginError(errorMessage);
     } finally {
       setLoginLoading(false);
     }

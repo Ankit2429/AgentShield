@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://agentshield-backend-y16q.onrender.com';
+const _rawApiUrl = process.env.REACT_APP_API_URL || 'https://agentshield-backend-y16q.onrender.com';
+const API_BASE_URL = _rawApiUrl.replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,

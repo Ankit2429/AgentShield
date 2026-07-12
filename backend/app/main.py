@@ -99,7 +99,7 @@ app.add_middleware(RequestSizeLimiterMiddleware)
 # Restrict origins in production environment
 cors_allowed_origins = ["*"]
 if settings.APP_ENV == "production":
-    raw_origins = os.getenv("CORS_ORIGIN_WHITELIST", "http://localhost:3000")
+    raw_origins = os.getenv("CORS_ORIGIN_WHITELIST", "*")
     cors_allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(
