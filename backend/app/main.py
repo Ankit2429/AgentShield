@@ -60,10 +60,12 @@ class HardeningHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Cache-Control"] = "no-store, max-age=0"
         
         # CSP: Safe directives allowing local self, WebSockets, and scripts
+        # Including CDNs required for FastAPI Swagger UI/ReDoc
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
             "connect-src 'self' ws: wss: http: https:;"
         )
         return response
