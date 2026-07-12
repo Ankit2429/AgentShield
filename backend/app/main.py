@@ -111,13 +111,15 @@ if settings.APP_ENV == "production":
         allow_creds = False
     else:
         cors_allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
-        if "https://agentshield.vercel.app" not in cors_allowed_origins:
-            cors_allowed_origins.append("https://agentshield.vercel.app")
         allow_creds = True
+else:
+    cors_allowed_origins = ["*"]
+    allow_creds = False
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=allow_creds,
     allow_methods=["*"],
     allow_headers=["*"],
