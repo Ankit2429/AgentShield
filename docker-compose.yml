@@ -1,12 +1,12 @@
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app/backend
+      - ./backend:/app
     environment:
       - APP_ENV=production
       - DATABASE_URL=${DATABASE_URL:-sqlite:///./agentshield.db}
