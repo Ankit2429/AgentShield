@@ -98,7 +98,7 @@ app.add_middleware(RequestSizeLimiterMiddleware)
 # ── CORS ──────────────────────────────────────────────────────────────────────
 # Restrict origins in production environment
 cors_allowed_origins = ["*"]
-allow_creds = True
+allow_creds = False
 if settings.APP_ENV == "production":
     raw_origins = os.getenv("CORS_ORIGIN_WHITELIST", "https://agentshield.vercel.app")
     if raw_origins.strip() == "*":
