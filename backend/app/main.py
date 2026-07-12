@@ -99,7 +99,8 @@ app.add_middleware(RequestSizeLimiterMiddleware)
 # Restrict origins in production environment
 cors_allowed_origins = ["*"]
 if settings.APP_ENV == "production":
-    cors_allowed_origins = [os.getenv("CORS_ORIGIN_WHITELIST", "http://localhost:3000")]
+    raw_origins = os.getenv("CORS_ORIGIN_WHITELIST", "http://localhost:3000")
+    cors_allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,12 +111,13 @@ app.add_middleware(
 )
 
 # ── Exception Handlers ────────────────────────────────────────────────────────
+import logging
+logger = logging.getLogger("agentshield.api")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Centralized validation error handler that suppresses raw framework output."""
-    # Create structured warning log
-    print(f"[SECURITY WARNING] Validation failed on path {request.url.path}: {exc}")
+    logger.warning(f"[SECURITY WARNING] Validation failed on path {request.url.path}: {exc}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": "Request validation failed. Malformed inputs or unexpected fields detected."}
