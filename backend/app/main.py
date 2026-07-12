@@ -53,6 +53,11 @@ class HardeningHeadersMiddleware(BaseHTTPMiddleware):
     """Inject browser security hardening headers into all responses."""
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
+        
+        # Bypass hardening headers for documentation endpoints
+        if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
+            return response
+            
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -60,12 +65,10 @@ class HardeningHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Cache-Control"] = "no-store, max-age=0"
         
         # CSP: Safe directives allowing local self, WebSockets, and scripts
-        # Including CDNs required for FastAPI Swagger UI/ReDoc
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
             "connect-src 'self' ws: wss: http: https:;"
         )
         return response
