@@ -6,6 +6,7 @@ import AgentsView from './components/AgentsView';
 import ThreatsView from './components/ThreatsView';
 import SettingsView from './components/SettingsView';
 import SandboxView from './components/SandboxView';
+import { GlobeCdn } from './components/GlobeCdn';
 import {
   LayoutDashboard,
   ShieldAlert,
@@ -331,30 +332,9 @@ export default function App() {
             }} />
           </div>
 
-          {/* Central sphere representation */}
-          <div className="relative">
-            <div className="w-48 h-48 rounded-full relative" style={{
-              background: 'radial-gradient(circle at 35% 35%, #C0C0C8, #4a4a5a, #1a1a2e)',
-              boxShadow: '0 0 60px rgba(67,97,238,0.2), inset 0 0 40px rgba(255,255,255,0.1)',
-              animation: 'pulse-glow 3s ease-in-out infinite',
-            }}>
-              <div className="absolute inset-4 rounded-full" style={{
-                background: 'radial-gradient(circle at 40% 30%, rgba(192,192,200,0.6), transparent 60%)',
-              }} />
-            </div>
-            {/* Orbiting ring */}
-            <div className="absolute inset-0 -m-8" style={{
-              border: '1px solid rgba(67,97,238,0.15)',
-              borderRadius: '50%',
-              animation: 'spin-slow 20s linear infinite',
-            }}>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: '#4361EE', boxShadow: '0 0 8px rgba(67,97,238,0.5)' }} />
-            </div>
-            <div className="absolute inset-0 -m-16" style={{
-              border: '1px solid rgba(76,201,240,0.1)',
-              borderRadius: '50%',
-              animation: 'spin-slow 30s linear infinite reverse',
-            }} />
+          {/* Interactive COBE Globe */}
+          <div className="w-full max-w-[500px] aspect-square flex items-center justify-center">
+            <GlobeCdn className="w-full h-full" />
           </div>
 
           <p className="absolute bottom-[15%] left-1/2 -translate-x-1/2 text-center text-[11px] font-medium tracking-[0.1em] uppercase whitespace-nowrap" style={{ color: 'rgba(254,250,224,0.25)' }}>
