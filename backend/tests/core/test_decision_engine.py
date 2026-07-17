@@ -1,5 +1,5 @@
 import pytest
-from app.core.decision_engine import DecisionEngine, Decision, ReasonCode
+from app.core.decision_engine import DecisionEngine, Decision, ReasonCode, DecisionSeverity
 from app.core.models import DetectionResult, ThreatResult, ThreatRule
 from app.core.severity import Severity
 from app.core.trust_engine import AgentTrustProfile, TrustStatus
@@ -57,4 +57,5 @@ def test_decision_interceptor_context(decision_engine):
     result = decision_engine.decide(detection_result=detection, trust_profile=trust, context=context)
     
     assert result.decision == Decision.BLOCK
-    assert ReasonCode.UNAUTHORIZED_TOOL in result.reasoning
+    assert ReasonCode.UNAUTHORIZED_TOOL_ACCESS in result.reasoning
+    assert result.severity == DecisionSeverity.HIGH

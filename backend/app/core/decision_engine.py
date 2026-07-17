@@ -155,6 +155,7 @@ class ReasonCode(str, Enum):
         POLICY_VIOLATION: Agent has an elevated policy-violation rate.
         BEHAVIOR_DEVIATION: Agent behaviour score is abnormally low.
         UNAUTHORIZED_TOOL: Requested tool is not on the approved list.
+        UNAUTHORIZED_TOOL_ACCESS: Requested tool violates capability matrix rules.
         SENSITIVE_TOOL: Requested tool is allowed but considered sensitive.
         UNKNOWN_AGENT: Agent has no interaction history (status NEW).
         BLOCKED_AGENT: Agent has previously been blocked by the platform.
@@ -174,6 +175,7 @@ class ReasonCode(str, Enum):
     POLICY_VIOLATION = "POLICY_VIOLATION"
     BEHAVIOR_DEVIATION = "BEHAVIOR_DEVIATION"
     UNAUTHORIZED_TOOL = "UNAUTHORIZED_TOOL"
+    UNAUTHORIZED_TOOL_ACCESS = "UNAUTHORIZED_TOOL_ACCESS"
     SENSITIVE_TOOL = "SENSITIVE_TOOL"
     UNKNOWN_AGENT = "UNKNOWN_AGENT"
     BLOCKED_AGENT = "BLOCKED_AGENT"
@@ -705,8 +707,10 @@ class DecisionEngine:
         is_unauthorized = False
 
         if context:
-            # Check for identity spoofing and authorization policy violations
-            if context.get("auth_matrix_authorized") is False or context.get("identity_spoofed") is True:
+            if context.get("auth_matrix_authorized") is False:
+                reasons.append(ReasonCode.UNAUTHORIZED_TOOL_ACCESS)
+                is_unauthorized = True
+            elif context.get("identity_spoofed") is True:
                 reasons.append(ReasonCode.UNAUTHORIZED_TOOL)
                 is_unauthorized = True
             
@@ -781,9 +785,11 @@ class DecisionEngine:
         if not all_reasons:
             all_reasons.append(ReasonCode.CLEAN)
 
-        # Composite severity: worst across risk and trust status.
+        # Composite severity: worst across risk, trust status, and tool authorization.
         trust_severity = _trust_to_severity(trust)
+        tool_severity = DecisionSeverity.HIGH if tool.is_unauthorized else DecisionSeverity.INFO
         composite_severity = _max_severity(risk.peak_severity, trust_severity)
+        composite_severity = _max_severity(composite_severity, tool_severity)
 
         confidence = DecisionEngine._calculate_confidence(
             risk=risk,
