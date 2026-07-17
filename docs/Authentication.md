@@ -1,6 +1,6 @@
 # Authentication
 
-AgentShield X implements a custom JWT authentication system with Role-Based Access Control.
+AgentShield implements a custom JWT authentication system with Role-Based Access Control.
 
 ---
 

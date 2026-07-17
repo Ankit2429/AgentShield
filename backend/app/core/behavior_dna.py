@@ -1,4 +1,4 @@
-"""Behavioral DNA Engine for AgentShield X.
+"""Behavioral DNA Engine for AgentShield.
 
 This module implements **explainable statistical profiling** for every AI agent
 observed by the platform.  It learns each agent's normal operating envelope

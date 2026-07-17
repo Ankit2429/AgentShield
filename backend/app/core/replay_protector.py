@@ -1,4 +1,4 @@
-"""Replay Attack Protection Engine for AgentShield X.
+"""Replay Attack Protection Engine for AgentShield.
 
 Thread-safe sliding-window registry that tracks event IDs and payload signatures
 to prevent replay and duplicate query attacks.

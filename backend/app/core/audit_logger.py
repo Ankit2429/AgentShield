@@ -1,4 +1,4 @@
-"""Structured Security Audit Logging System for AgentShield X.
+"""Structured Security Audit Logging System for AgentShield.
 
 Formats audit logs as structured JSON, outputs them to standard streams, and
 automatically scrubs credentials, authorization headers, and session tokens.

@@ -1,6 +1,6 @@
 # Vercel Deployment Guide (Frontend)
 
-AgentShield X uses a React single-page application built with Create React App (CRA). Vercel is the optimal platform for this deployment.
+AgentShield uses a React single-page application built with Create React App (CRA). Vercel is the optimal platform for this deployment.
 
 ## Vercel Project Configuration
 

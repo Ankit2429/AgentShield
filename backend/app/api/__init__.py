@@ -1,4 +1,4 @@
-"""AgentShield X API package.
+"""AgentShield API package.
 
 Provides the ``v1_router`` FastAPI ``APIRouter`` pre-configured with the
 ``/api/v1`` prefix and all sub-routers mounted.

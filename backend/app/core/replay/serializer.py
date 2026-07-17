@@ -1,4 +1,4 @@
-"""Replay session serialiser for the AgentShield X Attack Replay Engine.
+"""Replay session serialiser for the AgentShield Attack Replay Engine.
 
 This module converts :class:`~app.core.replay.replay_models.ReplaySession`
 objects into JSON-ready structures.  It is deliberately a thin, dependency-free

@@ -1,6 +1,6 @@
 # Frontend
 
-Overview of the AgentShield X frontend — a React-based SOC dashboard for real-time security monitoring.
+Overview of the AgentShield frontend — a React-based SOC dashboard for real-time security monitoring.
 
 ---
 

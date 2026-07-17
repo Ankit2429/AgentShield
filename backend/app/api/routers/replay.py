@@ -1,4 +1,4 @@
-"""Replay router for AgentShield X API v1.
+"""Replay router for AgentShield API v1.
 
 Endpoints
 ---------

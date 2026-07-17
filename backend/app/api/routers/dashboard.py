@@ -1,4 +1,4 @@
-"""Dashboard router for AgentShield X API v1.
+"""Dashboard router for AgentShield API v1.
 
 Endpoint
 --------

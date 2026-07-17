@@ -1,4 +1,4 @@
-"""SecurityEvent enrichment helpers for AgentShield X.
+"""SecurityEvent enrichment helpers for AgentShield.
 
 This module provides the single function that all engine callers use to attach
 their output to an existing :class:`~app.core.events.schema.SecurityEvent`.

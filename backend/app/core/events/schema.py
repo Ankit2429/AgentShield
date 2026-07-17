@@ -1,4 +1,4 @@
-"""Core SecurityEvent schema for AgentShield X.
+"""Core SecurityEvent schema for AgentShield.
 
 Every AI agent request that flows through the platform is represented as a
 single :class:`SecurityEvent`.  The event begins as a thin, immutable record

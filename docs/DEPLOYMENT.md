@@ -1,6 +1,6 @@
-# AgentShield X — Production Deployment Guide
+# AgentShield — Production Deployment Guide
 
-This guide covers deploying AgentShield X in a highly available, professional production environment using modern Platform-as-a-Service (PaaS) providers.
+This guide covers deploying AgentShield in a highly available, professional production environment using modern Platform-as-a-Service (PaaS) providers.
 
 ---
 
@@ -128,7 +128,7 @@ The `docker-compose.yml` provides stubs for PostgreSQL and Redis to emulate a co
 
 ## 5. Production Pre-Flight Checklist
 
-Before routing live traffic to AgentShield X, verify the following:
+Before routing live traffic to AgentShield, verify the following:
 
 ### Security
 - [ ] `APP_ENV` is explicitly set to `production`.

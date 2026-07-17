@@ -1,4 +1,4 @@
-"""Authorization Matrix Engine for AgentShield X.
+"""Authorization Matrix Engine for AgentShield.
 
 Verifies agent capability mapping rules to prevent Tool Abuse,
 Unauthorized Tool Calls, and Agent Identity Spoofing.

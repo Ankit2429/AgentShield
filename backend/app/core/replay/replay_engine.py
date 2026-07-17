@@ -1,4 +1,4 @@
-"""Attack Replay Engine for AgentShield X.
+"""Attack Replay Engine for AgentShield.
 
 The :class:`ReplayEngine` is the **stateful registry** for all replay
 sessions.  It manages the lifecycle of :class:`~app.core.replay.replay_models.ReplaySession`

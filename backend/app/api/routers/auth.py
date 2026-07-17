@@ -1,4 +1,4 @@
-"""Authentication and Authorization Router for AgentShield X.
+"""Authentication and Authorization Router for AgentShield.
 
 Manages security credentials, issues JWT access/refresh token pairs, handles
 refresh token rotation, and invalidates active sessions upon logout.

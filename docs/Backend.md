@@ -1,6 +1,6 @@
 # Backend
 
-Overview of the AgentShield X backend architecture, module organization, and design patterns.
+Overview of the AgentShield backend architecture, module organization, and design patterns.
 
 ---
 

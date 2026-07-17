@@ -1,12 +1,12 @@
 # QA Testing Guide
 
-This document outlines the testing architecture for AgentShield X and provides instructions for running the automated test suite.
+This document outlines the testing architecture for AgentShield and provides instructions for running the automated test suite.
 
 ---
 
 ## Overview
 
-AgentShield X uses `pytest` as its primary testing framework. The testing suite is divided into two main categories:
+AgentShield uses `pytest` as its primary testing framework. The testing suite is divided into two main categories:
 1. **Core Unit Tests:** Isolated tests for individual engines (Detection, Trust, Behavior, Decision, Replay) and utilities (JWT).
 2. **API Integration Tests:** End-to-end tests for the FastAPI router endpoints (Auth, Analyze, Health, WebSocket).
 
@@ -77,7 +77,7 @@ Open `htmlcov/index.html` in your web browser.
 
 ## Adding New Tests
 
-When contributing new engines or features to AgentShield X, please adhere to the following QA guidelines:
+When contributing new engines or features to AgentShield, please adhere to the following QA guidelines:
 1. **Naming:** All test files must start with `test_`.
 2. **Fixtures:** Use `pytest.fixture` for engine initialization rather than creating global instances.
 3. **Mocking:** Avoid mocking database/state layers unless strictly necessary. The in-memory engines are designed to be extremely fast and should be tested with real instances.

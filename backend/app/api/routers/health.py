@@ -1,4 +1,4 @@
-"""Health check router for AgentShield X API v1.
+"""Health check router for AgentShield API v1.
 
 Endpoint
 --------

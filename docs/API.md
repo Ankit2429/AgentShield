@@ -1,6 +1,6 @@
 # API Reference
 
-Complete endpoint documentation for AgentShield X API v1.
+Complete endpoint documentation for AgentShield API v1.
 
 All endpoints are prefixed with `/api/v1`.
 

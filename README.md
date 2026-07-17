@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ AgentShield X
+# 🛡️ AgentShield
 
 ### AI-to-AI Security Intelligence Platform
 
@@ -24,7 +24,7 @@ Real-time threat detection, behavioral DNA fingerprinting, dynamic trust scoring
 
 As AI agents become autonomous participants in enterprise workflows — calling tools, making decisions, and communicating with other agents — the attack surface expands beyond traditional application security.
 
-**AgentShield X** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a four-stage security pipeline:
+**AgentShield** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a four-stage security pipeline:
 
 1. **Detection** — Pattern-match against 20+ threat signatures (prompt injection, command injection, data exfiltration)
 2. **Behavioral DNA** — Build a statistical fingerprint of each agent's normal behavior and detect deviations
@@ -290,7 +290,7 @@ All endpoints are versioned under `/api/v1`.
 
 ## 🔐 Security Model
 
-AgentShield X implements defense-in-depth across multiple layers:
+AgentShield implements defense-in-depth across multiple layers:
 
 - **JWT Authentication** — Custom HS256 implementation with no third-party dependencies. Access tokens (15 min) + refresh tokens (7 days) with rotation and revocation.
 - **RBAC** — Three-tier role model (Admin → Security Analyst → Viewer) enforced server-side on every endpoint.

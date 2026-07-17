@@ -1,4 +1,4 @@
-"""Agents router for AgentShield X API v1.
+"""Agents router for AgentShield API v1.
 
 Endpoint
 --------

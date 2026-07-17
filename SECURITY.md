@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-AgentShield X provides security updates for the following versions:
+AgentShield provides security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,7 +11,7 @@ AgentShield X provides security updates for the following versions:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within AgentShield X, please **do not** open a public issue. We take security seriously and want to ensure vulnerabilities are addressed responsibly.
+If you discover a security vulnerability within AgentShield, please **do not** open a public issue. We take security seriously and want to ensure vulnerabilities are addressed responsibly.
 
 Please email the maintainers directly at `security@agentshield.com` (placeholder) with the following details:
 - A description of the vulnerability.
@@ -23,8 +23,8 @@ We will acknowledge receipt of your vulnerability report within 48 hours and str
 
 ## Bug Bounty
 
-AgentShield X is currently an open-source portfolio project. While we greatly appreciate responsible disclosure and will credit you in our Release Notes, we do not currently operate a paid bug bounty program.
+AgentShield is currently an open-source portfolio project. While we greatly appreciate responsible disclosure and will credit you in our Release Notes, we do not currently operate a paid bug bounty program.
 
 ## Architecture & Threat Model
 
-For information on how AgentShield X defends against AI-specific attacks (Prompt Injection, Trust Poisoning, Tool Abuse), please see the [Security Architecture Documentation](docs/Security.md).
+For information on how AgentShield defends against AI-specific attacks (Prompt Injection, Trust Poisoning, Tool Abuse), please see the [Security Architecture Documentation](docs/Security.md).

@@ -1,4 +1,4 @@
-"""SecurityEvent lifecycle definitions and utilities for AgentShield X.
+"""SecurityEvent lifecycle definitions and utilities for AgentShield.
 
 This module defines the canonical enrichment lifecycle of a
 :class:`~app.core.events.schema.SecurityEvent` and provides helpers that

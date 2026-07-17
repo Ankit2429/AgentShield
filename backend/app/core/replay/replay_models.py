@@ -1,4 +1,4 @@
-"""Data models for the AgentShield X Attack Replay Engine.
+"""Data models for the AgentShield Attack Replay Engine.
 
 This module owns the complete data contract for the replay subsystem.  No
 business logic lives here — only typed, immutable dataclasses that carry

@@ -1,4 +1,4 @@
-"""AgentShield X API v1 routers package.
+"""AgentShield API v1 routers package.
 
 All routers are imported here and re-exported for registration in
 :mod:`app.api`.  Adding a new router only requires adding it to this module

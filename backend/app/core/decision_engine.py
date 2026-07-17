@@ -1,6 +1,6 @@
-"""Decision Intelligence Engine for AgentShield X.
+"""Decision Intelligence Engine for AgentShield.
 
-The Decision Engine is the **brain** of AgentShield X.  It is a pure
+The Decision Engine is the **brain** of AgentShield.  It is a pure
 aggregation and reasoning layer: it receives structured outputs from the
 Detection Engine and the Trust Intelligence Engine, synthesises them, and
 produces a fully-explainable security decision.
@@ -425,7 +425,7 @@ class DecisionResult:
 
 
 class DecisionEngine:
-    """Explainable security decision engine for AgentShield X.
+    """Explainable security decision engine for AgentShield.
 
     The engine is a **stateless aggregator**: it holds no mutable agent state
     itself.  All state lives in the upstream :class:`~app.core.models.DetectionResult`

@@ -1,5 +1,5 @@
 # AgentShield Core Security and Trust Engine Package
-"""Public API for all AgentShield X core engines and the event bus.
+"""Public API for all AgentShield core engines and the event bus.
 
 Usage::
 

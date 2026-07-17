@@ -1,4 +1,4 @@
-"""Timeline Builder for the AgentShield X Attack Replay Engine.
+"""Timeline Builder for the AgentShield Attack Replay Engine.
 
 This module is the bridge between a fully (or partially) enriched
 :class:`~app.core.events.schema.SecurityEvent` and an ordered sequence of

@@ -1,6 +1,6 @@
 # Decision Engine
 
-The Decision Engine is the final arbiter of the AgentShield X security pipeline. It synthesizes signals from all upstream engines into an explainable security verdict.
+The Decision Engine is the final arbiter of the AgentShield security pipeline. It synthesizes signals from all upstream engines into an explainable security verdict.
 
 ---
 

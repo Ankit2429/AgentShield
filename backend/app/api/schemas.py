@@ -1,4 +1,4 @@
-"""Pydantic request and response schemas for the AgentShield X API v1.
+"""Pydantic request and response schemas for the AgentShield API v1.
 
 All models in this module are the **only** types that cross the HTTP boundary.
 Existing engine dataclasses are never exposed directly — they are always

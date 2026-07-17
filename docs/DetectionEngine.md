@@ -1,6 +1,6 @@
 # Detection Engine
 
-The Detection Engine is the first stage of the AgentShield X security pipeline. It performs pattern-matching threat detection against AI agent messages.
+The Detection Engine is the first stage of the AgentShield security pipeline. It performs pattern-matching threat detection against AI agent messages.
 
 ---
 

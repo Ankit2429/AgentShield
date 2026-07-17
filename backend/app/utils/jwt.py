@@ -1,4 +1,4 @@
-"""HS256 JWT signing and verification library for AgentShield X.
+"""HS256 JWT signing and verification library for AgentShield.
 
 Custom implementation using standard libraries (hmac, hashlib, base64, json) to
 eliminate external library dependency risk. Supports access/refresh token pairs

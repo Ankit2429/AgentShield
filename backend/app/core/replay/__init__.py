@@ -1,4 +1,4 @@
-"""AgentShield X — Attack Replay Engine package.
+"""AgentShield — Attack Replay Engine package.
 
 This sub-package provides a complete framework for reconstructing how a single
 AI agent request moved through every security engine in the platform.

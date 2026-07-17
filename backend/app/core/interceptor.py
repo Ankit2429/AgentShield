@@ -1,4 +1,4 @@
-"""Message Interceptor for AgentShield X.
+"""Message Interceptor for AgentShield.
 
 Protects against:
 - Indirect Prompt Injection

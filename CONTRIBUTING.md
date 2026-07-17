@@ -1,6 +1,6 @@
-# Contributing to AgentShield X
+# Contributing to AgentShield
 
-First off, thank you for considering contributing to AgentShield X!
+First off, thank you for considering contributing to AgentShield!
 
 This project is intended as a demonstration of production-quality security engineering for AI agent systems. Contributions that improve security, reliability, or developer experience are welcome.
 

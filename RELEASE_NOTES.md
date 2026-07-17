@@ -1,15 +1,15 @@
-# AgentShield X — v1.0.0 Release Notes
+# AgentShield — v1.0.0 Release Notes
 
 **Release Date:** July 12, 2026
 
-We are incredibly proud to announce the v1.0.0 release of AgentShield X. This release marks the transition from an MVP proof-of-concept into a production-ready, enterprise-grade AI security intelligence platform.
+We are incredibly proud to announce the v1.0.0 release of AgentShield. This release marks the transition from an MVP proof-of-concept into a production-ready, enterprise-grade AI security intelligence platform.
 
 Over the last several sprints, the platform has undergone a complete security audit, a DevOps transformation, and the formalization of its multi-engine architecture.
 
 ## 🌟 Highlights
 
 ### The 5-Engine Architecture
-The core of AgentShield X has been hardened into a synchronous, 5-stage pipeline:
+The core of AgentShield has been hardened into a synchronous, 5-stage pipeline:
 1. **Detection Engine:** Intercepts known threat signatures (Prompt/Command Injection, Exfiltration).
 2. **Behavioral DNA Engine:** Builds statistical baselines to catch zero-day anomalies based on deviations in tool usage, payload size, and frequency.
 3. **Trust Engine:** Manages long-term agent reputation using a composite score of history, behavior, and policy adherence.

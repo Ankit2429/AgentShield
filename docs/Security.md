@@ -1,6 +1,6 @@
 # Security Architecture
 
-AgentShield X employs defense-in-depth security engineering to protect the platform and the multi-agent systems it monitors.
+AgentShield employs defense-in-depth security engineering to protect the platform and the multi-agent systems it monitors.
 
 ---
 
@@ -38,7 +38,7 @@ Three-tier Role-Based Access Control enforced at the router layer via dependency
 
 ## 2. AI Threat Defense
 
-AgentShield X includes purpose-built defenses against attacks targeting AI agents.
+AgentShield includes purpose-built defenses against attacks targeting AI agents.
 
 ### Interceptor Guard
 - **Indirect Prompt Injection:** Detects XML tag overrides (`<instructions>`) and markdown comment injection

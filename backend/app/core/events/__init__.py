@@ -1,4 +1,4 @@
-"""AgentShield X — Security Event Bus package.
+"""AgentShield — Security Event Bus package.
 
 This sub-package defines the shared communication contract between all
 security engines: a single, immutable :class:`~app.core.events.schema.SecurityEvent`

@@ -1,4 +1,4 @@
-"""Dependency injection providers for AgentShield X API.
+"""Dependency injection providers for AgentShield API.
 
 All security engines and the replay subsystem are instantiated **once** at
 module import time and surfaced to routers via FastAPI dependency functions.

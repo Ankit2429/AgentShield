@@ -1,4 +1,4 @@
-"""Analyze router for AgentShield X API v1.
+"""Analyze router for AgentShield API v1.
 
 Endpoint
 --------
@@ -85,7 +85,7 @@ router = APIRouter(prefix="/analyze", tags=["Analyze"])
     dependencies=[Depends(require_roles("Admin", "Security Analyst"))],
     summary="Analyze an AI Agent Message",
     description=(
-        "Runs a message through the full AgentShield X security pipeline: "
+        "Runs a message through the full AgentShield security pipeline: "
         "Detection → Behavioral DNA → Trust → Decision. "
         "Returns a structured result and creates a replay session."
     ),
