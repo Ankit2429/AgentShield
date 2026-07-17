@@ -24,17 +24,22 @@ Real-time threat detection, behavioral DNA fingerprinting, dynamic trust scoring
 
 As AI agents become autonomous participants in enterprise workflows — calling tools, making decisions, and communicating with other agents — the attack surface expands beyond traditional application security.
 
-**AgentShield** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a comprehensive nine-stage security pipeline:
+**AgentShield** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a comprehensive security pipeline in this exact order:
 
-1. **Replay Protection** — SHA-256 payload deduplication with a sliding window to reject duplicate/replayed requests.
-2. **Identity Verification** — Verify agent identity against expected roles to prevent identity spoofing.
-3. **Authorization Matrix** — Capability matrix tool-authorization checks to prevent unauthorized tool access.
-4. **Message Interceptor** — Scan message contents to detect recursive tool loops, indirect prompt injections, and data exfiltration.
-5. **Detection Engine** — Pattern-match against 20+ compiled threat signatures (prompt injection, command injection, exfiltration) with severity-weighted risk scoring.
-6. **Behavioral DNA Engine** — Build a statistical fingerprint of each agent's normal behavior and detect deviations.
-7. **Trust Engine** — Resolve agent reputation scores pre-decision, and record decision outcomes (success/block) post-decision.
-8. **Decision Engine** — Synthesize all prior threat, trust, and policy signals into an explainable security verdict (ALLOW / MONITOR / BLOCK / QUARANTINE).
-9. **Replay Engine** — Record a forensic frame-by-frame timeline of the interaction for analysis and auditing.
+1. **Replay Protection Deduplication** (event_id + payload hash check) — outside try block
+2. **SecurityEvent creation**
+3. **Replay session opened**
+4. **Broadcast RECEIVED**
+5. **Identity Spoofing Check** (`auth_matrix.verify_agent_identity`)
+6. **Authorization / Capability Matrix Check** (`auth_matrix.check_authorization`)
+7. **Message Interceptor** (indirect prompt injection, loops, cross-agent contamination, exfiltration)
+8. **Detection Engine** (pattern/signature matching) + broadcast `DETECTION`
+9. **Behavioral DNA Engine** (baseline deviation analysis) + broadcast `BEHAVIOR`
+10. **Trust Engine agent registration** (pre-decision, no score change) + broadcast preliminary `TRUST`
+11. **Decision Engine** (synthesizes detection, trust, identity, auth, interceptor signals into ALLOW/MONITOR/BLOCK/QUARANTINE) + broadcast `DECISION`
+12. **Trust Engine score recording** (`record_block`/`record_success` based on FINAL decision) + broadcast corrected `TRUST`
+13. **Replay timeline build + session completion** + broadcast `REPLAY`
+14. **Final response returned** with `NEW_ANALYSIS` and `TRUST_UPDATE` broadcasts
 
 Every interaction is recorded as a replayable timeline, enabling security analysts to investigate incidents frame-by-frame through the SOC dashboard.
 
@@ -97,8 +102,9 @@ graph TB
     subgraph Core["Security Intelligence Core"]
         DET["Detection Engine"]
         DNA["Behavioral DNA Engine"]
-        TRUST["Trust Engine"]
+        TRUST_REG["Trust Reg (Pre-Decision)"]
         DEC["Decision Engine"]
+        TRUST_SCORE["Trust Score (Post-Decision)"]
         REPLAY["Replay Engine"]
         EVENTS["Event Bus"]
     end
@@ -117,11 +123,11 @@ graph TB
     VALIDATE --> REPLAY_API
     VALIDATE --> DASH
 
-    ANALYZE --> RP --> MATRIX --> INTERCEPT --> DET --> DNA --> TRUST --> DEC
-    DEC --> REPLAY
+    ANALYZE --> RP --> MATRIX --> INTERCEPT --> DET --> DNA --> TRUST_REG --> DEC --> TRUST_SCORE --> REPLAY
     DET --> EVENTS
     DNA --> EVENTS
-    TRUST --> EVENTS
+    TRUST_REG --> EVENTS
+    TRUST_SCORE --> EVENTS
     DEC --> EVENTS
 
     ANALYZE --> WS_EP
@@ -184,6 +190,8 @@ sequenceDiagram
 
     API->>Replay: Record session + frames
     API->>WS: Broadcast REPLAY
+    API->>WS: Broadcast NEW_ANALYSIS
+    API->>WS: Broadcast TRUST_UPDATE
     API-->>Client: AnalyzeResponse (full result + session_id)
 ```
 
