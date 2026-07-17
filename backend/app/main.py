@@ -1,4 +1,4 @@
-"""AgentShield X — FastAPI application entry point.
+"""AgentShield — FastAPI application entry point.
 
 The application mounts all API v1 routers under ``/api/v1``.
 The legacy ``/health`` stub is replaced by the production health router.
@@ -35,7 +35,7 @@ from app.config import settings
 
 # ── Application instance ──────────────────────────────────────────────────────
 app = FastAPI(
-    title="AgentShield X — AI Security Intelligence Platform",
+    title="AgentShield — AI Security Intelligence Platform",
     description=(
         "Production-quality security intelligence platform for AI-to-AI "
         "communication.  Provides detection, trust, decision, and replay "
