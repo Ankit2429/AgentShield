@@ -64,6 +64,13 @@ async def login(payload: OAuth2PasswordRequestForm = Depends()) -> dict[str, Any
     email = payload.username.lower().strip()
     user = USER_DB.get(email)
 
+    print(f"[AUTH] Login attempt: username={email!r}", flush=True)
+    if not user:
+        print(f"[AUTH] User NOT found in USER_DB: {email!r}. Stored keys: {list(USER_DB.keys())}", flush=True)
+    else:
+        pw_ok = verify_password(payload.password, user["salt"], user["key"])
+        print(f"[AUTH] User found. Password correct: {pw_ok}", flush=True)
+
     if not user or not verify_password(payload.password, user["salt"], user["key"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
