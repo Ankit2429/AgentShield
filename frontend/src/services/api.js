@@ -102,13 +102,23 @@ api.interceptors.response.use(
 
 /**
  * Log in to the backend platform.
+ *
+ * Uses a raw axios call (NOT the shared `api` instance) to guarantee that:
+ * 1. The global Content-Type: application/json default never overrides the
+ *    form-encoded body required by OAuth2PasswordRequestForm.
+ * 2. The Authorization interceptor never attaches a stale Bearer token to
+ *    the login request itself.
  */
 export const loginUser = async (email, password) => {
   const formData = new URLSearchParams();
   formData.append('username', email);
   formData.append('password', password);
-  
-  const response = await api.post('/auth/login', formData, {
+
+  // Log the exact URL in DevTools so we can confirm the endpoint during debugging
+  const loginUrl = `${API_BASE_URL}/api/v1/auth/login`;
+  console.log('[AUTH] loginUser -> POST', loginUrl);
+
+  const response = await axios.post(loginUrl, formData.toString(), {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
