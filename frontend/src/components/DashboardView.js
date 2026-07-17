@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDashboard, analyzeMessage, subscribeToEvents } from '../services/api';
+import { getDashboard, analyzeMessage, subscribeToEvents, seedDemoData } from '../services/api';
 import IncidentIntelligencePanel from './IncidentIntelligencePanel';
 import {
   Activity,
@@ -15,10 +15,13 @@ import {
   RefreshCw,
   Terminal,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X,
+  Zap,
+  FlaskConical
 } from 'lucide-react';
 
-export default function DashboardView({ onNavigateToSession }) {
+export default function DashboardView({ onNavigateToSession, onNavigateToSandbox }) {
   const [stats, setStats] = useState({
     active_agents: 0,
     total_sessions: 0,
@@ -42,6 +45,11 @@ export default function DashboardView({ onNavigateToSession }) {
   const [simStep, setSimStep] = useState('IDLE'); // IDLE, RECEIVED, DETECTION, BEHAVIOR, TRUST, DECISION, REPLAY, COMPLETE
   const [simResult, setSimResult] = useState(null);
   const [simError, setSimError] = useState(null);
+
+  // Demo seeding state
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [seedError, setSeedError] = useState(null);
+  const [seedSuccess, setSeedSuccess] = useState(false);
 
   const templates = {
     prompt: {
@@ -139,18 +147,20 @@ export default function DashboardView({ onNavigateToSession }) {
   const getVerdictStyle = (decision) => {
     if (!decision) return 'text-zinc-400 bg-zinc-900 border-zinc-800/80';
     const uppercase = decision.toUpperCase();
-    if (uppercase === 'BLOCK') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
-    if (uppercase === 'QUARANTINE') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
-    if (uppercase === 'REVIEW') return 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20';
-    if (uppercase === 'MONITOR') return 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20';
-    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
+    if (uppercase === 'BLOCK' || uppercase === 'QUARANTINE' || uppercase === 'CRITICAL') {
+      return 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20';
+    }
+    if (uppercase === 'MONITOR' || uppercase === 'REVIEW' || uppercase.includes('WARNING')) {
+      return 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20';
+    }
+    return 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20';
   };
 
   const getRiskColor = (risk) => {
     if (risk === null || risk === undefined) return 'text-zinc-550';
-    if (risk >= 0.8) return 'text-[#E07A5F] font-semibold';
-    if (risk >= 0.4) return 'text-[#F4A261]';
-    if (risk > 0.0) return 'text-[#4361EE]';
+    if (risk >= 0.8) return 'text-[#ef4444] font-semibold';
+    if (risk >= 0.4) return 'text-[#f59e0b]';
+    if (risk > 0.0) return 'text-[#22c55e]';
     return 'text-zinc-550';
   };
 
@@ -162,15 +172,12 @@ export default function DashboardView({ onNavigateToSession }) {
       setSimResult(null);
       setSimStep('RECEIVED');
 
-      // Subscribe to WebSocket pipeline progress for matches
       const socketUnsubscribe = subscribeToEvents((msg) => {
         if (msg.type === 'pipeline_progress' && msg.agent_id === simForm.agent_id) {
-          console.log('[WS Simulation] Progressing stage:', msg.stage);
           setSimStep(msg.stage);
         }
       });
 
-      // Submit API request
       const data = await analyzeMessage({
         agent_id: simForm.agent_id.trim(),
         message: simForm.message.trim(),
@@ -178,17 +185,14 @@ export default function DashboardView({ onNavigateToSession }) {
         metadata: { simulation: true, source: 'SOC Attack Desk' }
       });
 
-      // Cleanup subscription
       socketUnsubscribe();
 
-      // Final step resolution transition
       setSimStep('REPLAY');
       await new Promise(resolve => setTimeout(resolve, 300));
 
       setSimResult(data);
       setSimStep('COMPLETE');
 
-      // Refresh dashboard background stats instantly
       getDashboard().then(newData => {
         setStats(newData);
       }).catch(err => console.error('Stats sync error:', err));
@@ -196,6 +200,27 @@ export default function DashboardView({ onNavigateToSession }) {
       console.error('Error running attack simulation:', err);
       setSimError(err.response?.data?.detail || 'Simulation pipeline failed during gateway handshakes.');
       setSimStep('IDLE');
+    }
+  };
+
+  const handleRunDemoScenario = async () => {
+    setSeedError(null);
+    setSeedSuccess(false);
+    setIsSeeding(true);
+    try {
+      await seedDemoData(false);
+      setSeedSuccess(true);
+      // Refresh dashboard after seeding
+      const data = await getDashboard();
+      setStats(data);
+      setError(null);
+      setTimeout(() => setSeedSuccess(false), 4000);
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Demo seeding failed. Ensure DEMO_MODE is enabled on the backend.';
+      setSeedError(msg);
+      setTimeout(() => setSeedError(null), 6000);
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -242,15 +267,28 @@ export default function DashboardView({ onNavigateToSession }) {
               color: '#FEFAE0'
             }}
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-[18px] h-[18px]" strokeWidth={1.5} />
             Refresh Feed
           </button>
         </div>
       </div>
 
+      {/* Seed feedback banners */}
+      {seedSuccess && (
+        <div className="p-4 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-xl text-[#22c55e] text-xs flex items-center space-x-2.5">
+          <CheckCircle2 className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+          <span>Demo scenarios loaded successfully. Dashboard refreshed with real pipeline data.</span>
+        </div>
+      )}
+      {seedError && (
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-xs flex items-center space-x-2.5">
+          <AlertCircle className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+          <span>{seedError}</span>
+        </div>
+      )}
       {error && (
-        <div className="p-4 bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-xl text-[#E07A5F] text-xs flex items-center space-x-2.5">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+        <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl text-[#ef4444] text-xs flex items-center space-x-2.5">
+          <AlertCircle className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
           <span>{error}</span>
         </div>
       )}
@@ -258,29 +296,62 @@ export default function DashboardView({ onNavigateToSession }) {
       {/* Streamlined System Telemetry Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Active Fleet', value: stats.active_agents, desc: 'Registered agent profiles', icon: Users, color: '#4CC9F0' },
-          { label: 'Total Interceptions', value: stats.total_sessions, desc: 'Requests analyzed', icon: Activity, color: '#4361EE' },
-          { label: 'Threats Intercepted', value: stats.threat_sessions, desc: 'Flagged sessions', icon: ShieldOff, color: '#E07A5F', alert: stats.threat_sessions > 0 },
-          { label: 'Active Blockade', value: stats.blocked_sessions, desc: 'Access decisions denied', icon: AlertTriangle, color: '#F4A261', alert: stats.blocked_sessions > 0 },
-          { label: 'Fleet Trust Average', value: `${(stats.average_trust_score * 100).toFixed(1)}%`, desc: 'Fleet-wide baseline', icon: TrendingUp, color: '#2A9D8F' }
-        ].map((item, idx) => (
-          <div key={idx} className="card-surface p-5 card-surface-hover flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>{item.label}</span>
-              <item.icon className="w-4 h-4" style={{ color: item.color }} />
+          { label: 'Active Fleet', value: stats.active_agents, desc: 'Registered agent profiles', icon: Users, color: '#4CC9F0', priority: 'neutral' },
+          { label: 'Total Interceptions', value: stats.total_sessions, desc: 'Requests analyzed', icon: Activity, color: '#4361EE', priority: 'neutral' },
+          { label: 'Threats Intercepted', value: stats.threat_sessions, desc: 'Flagged sessions', icon: ShieldOff, color: '#E07A5F', priority: 'high', borderColor: 'rgba(224, 122, 95, 0.25)', glowColor: 'rgba(224, 122, 95, 0.15)' },
+          { label: 'Active Blockade', value: stats.blocked_sessions, desc: 'Access decisions denied', icon: AlertTriangle, color: '#F4A261', priority: 'high', borderColor: 'rgba(244, 162, 97, 0.25)', glowColor: 'rgba(244, 162, 97, 0.15)' },
+          { label: 'Fleet Trust Average', value: `${(stats.average_trust_score * 100).toFixed(1)}%`, desc: 'Fleet-wide baseline', icon: TrendingUp, color: '#2A9D8F', priority: 'neutral' }
+        ].map((item, idx) => {
+          const isHigh = item.priority === 'high';
+          return (
+            <div 
+              key={idx} 
+              className={`card-surface p-5 card-surface-hover flex flex-col justify-between transition-all duration-300 ${
+                isHigh ? 'relative overflow-hidden' : ''
+              }`}
+              style={{
+                borderColor: isHigh ? item.borderColor : undefined,
+                boxShadow: isHigh ? `0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px ${item.glowColor}` : undefined
+              }}
+            >
+              {/* Colored top accent bar for high priority metrics */}
+              {isHigh && (
+                <div 
+                  className="absolute top-0 left-0 right-0 h-[3px]" 
+                  style={{ background: item.color }}
+                />
+              )}
+              
+              <div className="flex items-center justify-between mb-3">
+                <span 
+                  className="text-[10px] uppercase font-bold tracking-wider" 
+                  style={{ 
+                    color: isHigh ? item.color : 'rgba(254,250,224,0.35)', 
+                    fontFamily: 'var(--font-display)' 
+                  }}
+                >
+                  {item.label}
+                </span>
+                <item.icon className="w-6 h-6" style={{ color: item.color }} strokeWidth={1.5} />
+              </div>
+              <div>
+                <span 
+                  className={`tracking-tight font-mono font-bold ${
+                    isHigh ? 'text-3xl' : 'text-2xl'
+                  }`} 
+                  style={{ 
+                    color: isHigh ? '#FEFAE0' : '#FEFAE0'
+                  }}
+                >
+                  {loading ? '...' : item.value}
+                </span>
+                <p className="text-[10px] mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                  {item.desc}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className={`text-2xl font-bold tracking-tight font-mono ${
-                item.alert && stats.total_sessions > 0 && !loading ? 'text-[#E07A5F]' : ''
-              }`} style={{ color: !(item.alert && stats.total_sessions > 0 && !loading) ? '#FEFAE0' : undefined }}>
-                {loading ? '...' : item.value}
-              </span>
-              <p className="text-[10px] mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                {item.desc}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Dashboard Main Grid Layout */}
@@ -312,8 +383,71 @@ export default function DashboardView({ onNavigateToSession }) {
               <tbody className="divide-y divide-white/[0.04] text-[11px]">
                 {stats.recent_decisions.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-5 py-12 text-center italic" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                      No security decisions logged. Run an analysis using the Attack Simulator.
+                    <td colSpan="6" className="px-5 py-0">
+                      {/* Empty State Panel */}
+                      <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+                        <div
+                          className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+                          style={{ background: 'rgba(67,97,238,0.08)', border: '1px solid rgba(67,97,238,0.15)' }}
+                        >
+                          <ShieldOff className="w-7 h-7" style={{ color: '#4361EE' }} strokeWidth={1.5} />
+                        </div>
+
+                        <h3
+                          className="text-sm font-semibold mb-2"
+                          style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}
+                        >
+                          No investigation history found.
+                        </h3>
+                        <p
+                          className="text-xs max-w-xs mb-8 leading-relaxed"
+                          style={{ color: 'rgba(254,250,224,0.45)' }}
+                        >
+                          The security pipeline is active and ready to intercept threats.
+                          Load a demo scenario to see the system in action, or run a
+                          custom payload in the Security Playground.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          {/* Primary CTA: seed demo data */}
+                          <button
+                            onClick={handleRunDemoScenario}
+                            disabled={isSeeding}
+                            className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-lg transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                            style={{
+                              background: '#4361EE',
+                              color: '#FFFFFF',
+                              boxShadow: '0 4px 12px rgba(67,97,238,0.35)',
+                            }}
+                          >
+                            {isSeeding ? (
+                              <>
+                                <div className="w-3.5 h-3.5 rounded-full border border-white/40 border-t-white animate-spin" />
+                                Loading Scenarios...
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="w-3.5 h-3.5" strokeWidth={2} />
+                                Run Demo Scenario
+                              </>
+                            )}
+                          </button>
+
+                          {/* Secondary CTA: go to Sandbox */}
+                          <button
+                            onClick={() => onNavigateToSandbox && onNavigateToSandbox()}
+                            className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-lg transition-all duration-150 hover:-translate-y-0.5"
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid rgba(254,250,224,0.12)',
+                              color: '#FEFAE0',
+                            }}
+                          >
+                            <FlaskConical className="w-3.5 h-3.5" strokeWidth={1.5} />
+                            Launch Security Playground
+                          </button>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -377,8 +511,8 @@ export default function DashboardView({ onNavigateToSession }) {
                 </div>
                 <div className="text-right">
                   <div className="flex items-center justify-end space-x-1.5">
-                    <span className="w-1 h-1 rounded-full bg-[#2A9D8F]"></span>
-                    <span className="text-[9px] font-bold font-mono uppercase" style={{ color: '#2A9D8F' }}>{engine.check}</span>
+                    <span className="w-1 h-1 rounded-full bg-[#22c55e]"></span>
+                    <span className="text-[9px] font-bold font-mono uppercase" style={{ color: '#22c55e' }}>{engine.check}</span>
                   </div>
                   <span className="text-[9px] font-mono mt-0.5 block" style={{ color: 'rgba(254,250,224,0.35)' }}>lat: {engine.latency}</span>
                 </div>
@@ -420,9 +554,7 @@ export default function DashboardView({ onNavigateToSession }) {
                   className="p-1 rounded transition-colors hover:bg-white/[0.05]"
                   style={{ color: 'rgba(254,250,224,0.35)' }}
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="w-[18px] h-[18px]" strokeWidth={1.5} />
                 </button>
               ) : null}
             </div>
@@ -589,8 +721,8 @@ export default function DashboardView({ onNavigateToSession }) {
                       <div key={step.id} className="relative text-xs">
                         {/* Dot indicator */}
                         <div className="absolute -left-[30px] top-0.5 w-[9px] h-[9px] rounded-full border-2" style={{
-                          background: isCompleted ? '#2A9D8F' : isActive ? '#4361EE' : '#0c0c0e',
-                          borderColor: isCompleted ? '#2A9D8F' : isActive ? '#4361EE' : 'rgba(254,250,224,0.1)'
+                          background: isCompleted ? '#22c55e' : isActive ? '#4361EE' : '#0c0c0e',
+                          borderColor: isCompleted ? '#22c55e' : isActive ? '#4361EE' : 'rgba(254,250,224,0.1)'
                         }}></div>
 
                         <div className="space-y-0.5">
@@ -612,7 +744,7 @@ export default function DashboardView({ onNavigateToSession }) {
             {simStep === 'COMPLETE' && simResult && (
               <div className="p-6 overflow-y-auto max-h-[70vh] scrollbar-thin">
                 <div className="text-center space-y-2 mb-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto text-xs font-mono font-bold border" style={{ background: '#181D4A', borderColor: '#2A9D8F', color: '#2A9D8F' }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto text-xs font-mono font-bold border" style={{ background: '#181D4A', borderColor: '#22c55e', color: '#22c55e' }}>
                     ✓
                   </div>
                   <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Simulation Complete</h3>

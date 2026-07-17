@@ -9,6 +9,7 @@ from app.api.routers.agents import router as agents_router
 from app.api.routers.analyze import router as analyze_router
 from app.api.routers.auth import router as auth_router
 from app.api.routers.dashboard import router as dashboard_router
+from app.api.routers.demo import router as demo_router
 from app.api.routers.health import router as health_router
 from app.api.routers.replay import router as replay_router
 from app.api.routers.ws import router as ws_router
@@ -19,6 +20,7 @@ __all__ = [
     "replay_router",
     "agents_router",
     "dashboard_router",
+    "demo_router",
     "health_router",
     "ws_router",
 ]

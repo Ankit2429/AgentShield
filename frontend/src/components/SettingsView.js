@@ -111,7 +111,7 @@ export default function SettingsView() {
 
       {savedMessage && (
         <div className="p-4 bg-[#2A9D8F]/10 border border-[#2A9D8F]/20 rounded-xl text-[#2A9D8F] text-xs flex items-center space-x-2.5">
-          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+          <CheckCircle2 className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
           <span>Configuration saved successfully and replicated to the security engine cluster.</span>
         </div>
       )}
@@ -141,7 +141,7 @@ export default function SettingsView() {
                   color: activeConfigTab === tab.id ? '#4361EE' : 'rgba(254, 250, 224, 0.6)',
                 }}
               >
-                <Icon className="w-4 h-4 flex-shrink-0" />
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -200,7 +200,7 @@ export default function SettingsView() {
                     <option value="MEDIUM">MEDIUM (Balanced heuristics)</option>
                     <option value="HIGH">HIGH (Paranoid strict signature check)</option>
                   </select>
-                  <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                  <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
                 </div>
               </div>
             </div>
@@ -289,7 +289,7 @@ export default function SettingsView() {
                       <option value="QUARANTINE">QUARANTINE</option>
                       <option value="REVIEW">REVIEW</option>
                     </select>
-                    <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                    <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
                   </div>
                 </div>
 
@@ -313,7 +313,7 @@ export default function SettingsView() {
                       <option value="REVIEW">REVIEW</option>
                       <option value="MONITOR">MONITOR</option>
                     </select>
-                    <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                    <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
                   </div>
                 </div>
               </div>

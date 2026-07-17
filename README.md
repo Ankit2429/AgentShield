@@ -260,7 +260,10 @@ npm install
 npm start
 ```
 
-### Default Credentials
+### Default Credentials (Development Mode Only)
+
+> [!WARNING]
+> The default credentials below are only seeded automatically in **development/demo mode** (`APP_ENV=development`). In a **production** environment (`APP_ENV=production`), these accounts are completely disabled, and no demo user records are created.
 
 | Email | Password | Role |
 |-------|----------|------|
@@ -269,7 +272,7 @@ npm start
 | `viewer@agentshield.com` | `viewer-password` | Viewer |
 
 > [!CAUTION]
-> These credentials are for development only. Replace with strong credentials and externalized secret management in production.
+> These credentials are for development only. Production deployments must utilize external identity providers or populate credentials securely via a backing database.
 
 ---
 

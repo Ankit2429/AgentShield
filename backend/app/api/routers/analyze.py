@@ -418,6 +418,7 @@ def _build_analyze_response(event, session_id: str) -> AnalyzeResponse:
         recommendation=rec_val.value if hasattr(rec_val, "value") else str(rec_val),
         reason_codes=reason_codes,
         explanation=dr.explanation,
+        risk_score=dr.risk_score or 0.0,
     )
 
     return AnalyzeResponse(

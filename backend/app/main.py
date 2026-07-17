@@ -22,6 +22,7 @@ TODO [LIFESPAN]:   Add an ``asynccontextmanager`` lifespan to warm up heavy
 import os
 import time
 import traceback
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -32,6 +33,33 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api import v1_router
 from app.config import settings
+
+import logging
+_logger = logging.getLogger("agentshield.startup")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup / shutdown lifecycle handler.
+
+    On startup:
+    - If DEMO_MODE is enabled and no sessions exist, runs the demo seeder to
+      populate the dashboard with realistic agent data so a first-time user
+      never sees an empty state.
+    """
+    if settings.DEMO_MODE:
+        _logger.info("[STARTUP] DEMO_MODE=True — running demo data seeder...")
+        try:
+            from app.core.demo_seeder import run_demo_seed
+            await run_demo_seed()
+        except Exception as exc:
+            _logger.error("[STARTUP] Demo seeder failed (non-fatal): %s", exc)
+    else:
+        _logger.info("[STARTUP] DEMO_MODE=False — skipping demo seed.")
+
+    yield  # Application is now running
+
+    _logger.info("[SHUTDOWN] AgentShield shutting down.")
 
 # ── Application instance ──────────────────────────────────────────────────────
 app = FastAPI(
@@ -45,6 +73,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # ── Custom Middlewares ────────────────────────────────────────────────────────
@@ -126,7 +155,6 @@ app.add_middleware(
 )
 
 # ── Exception Handlers ────────────────────────────────────────────────────────
-import logging
 logger = logging.getLogger("agentshield.api")
 
 @app.exception_handler(RequestValidationError)

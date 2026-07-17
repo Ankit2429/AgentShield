@@ -852,6 +852,19 @@ class DecisionEngine:
             decision=decision,
         )
 
+        # Synthesise risk score based on enforcement severity or decision
+        risk_score = detection_result.risk_score
+        if decision == Decision.BLOCK:
+            risk_score = max(risk_score, 1.0)
+        elif decision == Decision.QUARANTINE:
+            risk_score = max(risk_score, 0.9)
+        elif decision == Decision.REVIEW:
+            risk_score = max(risk_score, 0.7)
+        elif decision == Decision.MONITOR:
+            risk_score = max(risk_score, 0.4)
+        elif decision == Decision.ALLOW_WITH_WARNING:
+            risk_score = max(risk_score, 0.2)
+
         return DecisionResult(
             decision_id=str(uuid.uuid4()),
             decision=decision,
@@ -860,7 +873,7 @@ class DecisionEngine:
             reasoning=findings.all_reasons,
             recommendation=recommendation,
             explanation=explanation,
-            risk_score=detection_result.risk_score,
+            risk_score=risk_score,
             trust_score=trust_profile.trust_score,
             behavior_score=trust_profile.behavior_score,
             policy_score=trust_profile.policy_score,

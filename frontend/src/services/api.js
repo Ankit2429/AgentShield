@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-const _rawApiUrl = process.env.REACT_APP_API_URL || 'https://agentshield-backend-yl6q.onrender.com';
-const API_BASE_URL = _rawApiUrl.replace(/\/+$/, '');
+const _rawApiUrl = process.env.REACT_APP_API_URL;
+if (!_rawApiUrl) {
+  console.warn("REACT_APP_API_URL environment variable is missing!");
+}
+const API_BASE_URL = (_rawApiUrl || 'http://localhost:8000').replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
@@ -190,70 +193,209 @@ export const analyzeMessage = async (payload) => {
   return response.data;
 };
 
-// Singleton WebSocket client manager
-let socket = null;
+/**
+ * Trigger the demo data seeder (DEMO_MODE only, Admin role required).
+ * @param {boolean} force - If true, re-seeds even if sessions exist.
+ */
+export const seedDemoData = async (force = false) => {
+  const response = await api.post(`/demo/seed${force ? '?force=true' : ''}`);
+  return response.data;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WebSocket Singleton — exponential-backoff reconnect
+// ─────────────────────────────────────────────────────────────────────────────
+
 const listeners = new Set();
 
+// Internal state — never exported
+let _socket = null;            // the live WebSocket instance
+let _reconnectTimer = null;    // pending setTimeout handle (prevents duplicate timers)
+let _pingInterval = null;      // keepalive ping interval handle
+let _retryDelay = 1000;        // current backoff delay in ms
+let _intentionalClose = false; // true when the app deliberately closes the socket
+
+const _BACKOFF_STEPS = [1000, 2000, 4000, 8000, 15000]; // ms
+
+/** Advance backoff delay to the next step, capped at 15 s. */
+function _nextBackoff() {
+  const idx = _BACKOFF_STEPS.indexOf(_retryDelay);
+  _retryDelay = (idx >= 0 && idx < _BACKOFF_STEPS.length - 1)
+    ? _BACKOFF_STEPS[idx + 1]
+    : 15000;
+}
+
+/** Reset backoff to 1 s after a successful connection. */
+function _resetBackoff() {
+  _retryDelay = 1000;
+}
+
+/** Cancel any pending reconnect timer. */
+function _clearReconnectTimer() {
+  if (_reconnectTimer !== null) {
+    clearTimeout(_reconnectTimer);
+    _reconnectTimer = null;
+  }
+}
+
+/** Stop the keepalive ping interval and clear its reference. */
+function _clearPing() {
+  if (_pingInterval !== null) {
+    clearInterval(_pingInterval);
+    _pingInterval = null;
+  }
+}
+
+/**
+ * Open a new WebSocket and wire up all event handlers.
+ * Guards against opening a duplicate socket if one is already live.
+ */
+function _connectSocket() {
+  // Prevent a second socket from being created while one is open/connecting.
+  if (
+    _socket &&
+    (_socket.readyState === WebSocket.OPEN || _socket.readyState === WebSocket.CONNECTING)
+  ) {
+    console.log('[WS] Socket already open or connecting — skipping duplicate connect.');
+    return;
+  }
+
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    console.warn('[WS] No access token — connection deferred until subscriber logs in.');
+    return;
+  }
+
+  const wsBase = API_BASE_URL.replace(/^http/, 'ws');
+  const wsUrl = `${wsBase}/api/v1/ws?token=${encodeURIComponent(token)}`;
+  console.log(`[WS] Connecting to ${wsBase}/api/v1/ws...`);
+
+  _socket = new WebSocket(wsUrl);
+
+  // ── onopen ──────────────────────────────────────────────────────────────
+  _socket.onopen = () => {
+    console.log('[WS] ✅ Connected — live SOC feed online.');
+    _resetBackoff();
+    _clearReconnectTimer(); // cancel any timer that fired just before connect succeeded
+
+    // Keepalive pings every 30 s. Always clear first to avoid duplicates.
+    _clearPing();
+    _pingInterval = setInterval(() => {
+      if (_socket && _socket.readyState === WebSocket.OPEN) {
+        _socket.send('ping');
+      } else {
+        _clearPing();
+      }
+    }, 30000);
+  };
+
+  // ── onmessage ───────────────────────────────────────────────────────────
+  _socket.onmessage = (event) => {
+    if (event.data === 'pong') return;
+    try {
+      const message = JSON.parse(event.data);
+      listeners.forEach((cb) => {
+        try {
+          cb(message);
+        } catch (listenerErr) {
+          console.error('[WS] Listener callback error:', listenerErr);
+        }
+      });
+    } catch (_parseErr) {
+      // Suppress non-JSON frames (keepalive text etc.)
+    }
+  };
+
+  // ── onerror ─────────────────────────────────────────────────────────────
+  _socket.onerror = () => {
+    // onerror always fires just before onclose — logging only.
+    // Reconnect logic lives entirely in onclose to avoid double-scheduling.
+    console.warn('[WS] ⚠️  Connection error — will attempt reconnect after close.');
+  };
+
+  // ── onclose ─────────────────────────────────────────────────────────────
+  _socket.onclose = (event) => {
+    _clearPing();
+    _socket = null;
+
+    // Intentional close (logout / all listeners removed) — do not reconnect.
+    if (_intentionalClose) {
+      console.log(`[WS] 🔴 Closed intentionally (code ${event.code}). Reconnect suppressed.`);
+      _intentionalClose = false;
+      return;
+    }
+
+    // Do not schedule a second timer if one is already pending.
+    if (_reconnectTimer !== null) {
+      console.log('[WS] Reconnect timer already pending — skipping duplicate schedule.');
+      return;
+    }
+
+    const hasListeners = listeners.size > 0;
+    const hasToken = !!localStorage.getItem('access_token');
+
+    if (!hasListeners || !hasToken) {
+      console.log(`[WS] Closed (code ${event.code}). No active listeners or token — not reconnecting.`);
+      return;
+    }
+
+    const delayToUse = _retryDelay;
+    console.log(`[WS] 🔌 Disconnected (code ${event.code}). Reconnecting in ${delayToUse / 1000}s...`);
+    _nextBackoff(); // Advance delay NOW so the next failure waits longer
+
+    _reconnectTimer = setTimeout(() => {
+      _reconnectTimer = null;
+
+      if (listeners.size > 0 && localStorage.getItem('access_token')) {
+        console.log('[WS] 🔄 Reconnecting...');
+        _connectSocket();
+      } else {
+        console.log('[WS] Reconnect aborted — session ended or no subscribers remain.');
+        _resetBackoff();
+      }
+    }, delayToUse);
+  };
+}
+
+/**
+ * Subscribe a callback to real-time WebSocket events.
+ *
+ * - Safe to call multiple times with the same callback (idempotent via Set).
+ * - Automatically opens or reuses a WebSocket connection.
+ * - Reconnects with exponential backoff [1s → 2s → 4s → 8s → 15s] after any
+ *   involuntary disconnect (backend restart, network interruption, etc.).
+ * - Stops reconnecting when the last subscriber unsubscribes or the user
+ *   logs out.
+ *
+ * @param   {function} callback  Called with each parsed JSON message object.
+ * @returns {function}           Unsubscribe function — call it on component unmount.
+ */
 export const subscribeToEvents = (callback) => {
   listeners.add(callback);
 
-  if (!socket) {
-    const token = localStorage.getItem('access_token');
-    // Enforce authenticated query parameter
-    const wsUrl = `${API_BASE_URL.replace(/^http/, 'ws')}/api/v1/ws?token=${encodeURIComponent(token || '')}`;
-    console.log('[WS] Establishing authenticated link to:', wsUrl);
-
-    socket = new WebSocket(wsUrl);
-
-    socket.onopen = () => {
-      console.log('[WS] Live SOC link online.');
-      const pingInterval = setInterval(() => {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send('ping');
-        } else {
-          clearInterval(pingInterval);
-        }
-      }, 30000);
-    };
-
-    socket.onmessage = (event) => {
-      if (event.data === 'pong') return;
-      try {
-        const message = JSON.parse(event.data);
-        listeners.forEach((cb) => {
-          try {
-            cb(message);
-          } catch (e) {
-            console.error('[WS] Listener error:', e);
-          }
-        });
-      } catch (err) {
-        // Suppress ping pong text message logs
-      }
-    };
-
-    socket.onclose = (event) => {
-      console.log(`[WS] Connection closed (code: ${event.code}). Attempting reconnect in 3s...`);
-      socket = null;
-      setTimeout(() => {
-        if (listeners.size > 0 && localStorage.getItem('access_token')) {
-          const dummy = () => {};
-          subscribeToEvents(dummy);
-          listeners.delete(dummy);
-        }
-      }, 3000);
-    };
-
-    socket.onerror = (err) => {
-      console.error('[WS] Connection error:', err);
-    };
+  // Open a connection if none exists or if the existing one has already closed.
+  if (!_socket || (_socket.readyState !== WebSocket.OPEN && _socket.readyState !== WebSocket.CONNECTING)) {
+    _intentionalClose = false;
+    _clearReconnectTimer(); // cancel any stale timer before a manual reconnect
+    _connectSocket();
   }
 
+  // Return the unsubscribe function for this specific callback.
   return () => {
     listeners.delete(callback);
-    if (listeners.size === 0 && socket) {
-      socket.close();
-      socket = null;
+
+    // Only close the socket when the LAST listener unsubscribes AND there is no
+    // pending timer that would reopen it.  Pending timers fire into _connectSocket
+    // which will no-op if listeners.size === 0 at that point.
+    if (listeners.size === 0 && _reconnectTimer === null) {
+      _intentionalClose = true;
+      _clearPing();
+      if (_socket) {
+        _socket.close(1000, 'All listeners unsubscribed.');
+        _socket = null;
+      }
+      _resetBackoff();
+      console.log('[WS] 🔴 All listeners removed — connection closed cleanly.');
     }
   };
 };

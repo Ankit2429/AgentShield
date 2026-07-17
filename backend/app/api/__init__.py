@@ -16,6 +16,7 @@ from app.api.routers import (
     analyze_router,
     auth_router,
     dashboard_router,
+    demo_router,
     health_router,
     replay_router,
     ws_router,
@@ -29,6 +30,7 @@ v1_router.include_router(analyze_router)
 v1_router.include_router(replay_router)
 v1_router.include_router(agents_router)
 v1_router.include_router(dashboard_router)
+v1_router.include_router(demo_router)
 v1_router.include_router(health_router)
 v1_router.include_router(ws_router)
 

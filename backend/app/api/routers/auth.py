@@ -22,26 +22,32 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-# Predefined production-grade user access credentials database (hashed dynamically at startup)
-_CREDENTIALS = {
-    "admin@agentshield.com": {"password": "admin-password", "role": "Admin"},
-    "analyst@agentshield.com": {"password": "analyst-password", "role": "Security Analyst"},
-    "viewer@agentshield.com": {"password": "viewer-password", "role": "Viewer"},
-}
-
+# Predefined user access credentials database.
+# IMPORTANT: Demo/development credentials must ONLY be loaded in development/testing mode.
+# In production, this dictionary is empty by default unless populated via a secure backing database.
 USER_DB: dict[str, dict[str, Any]] = {}
 
-for email, data in _CREDENTIALS.items():
-    salt = os.urandom(16)
-    key = hashlib.pbkdf2_hmac("sha256", data["password"].encode("utf-8"), salt, 100000)
-    USER_DB[email] = {
-        "salt": salt,
-        "key": key,
-        "role": data["role"]
+if settings.APP_ENV == "production":
+    print("[INFO] Production mode: demo credentials are disabled. No hardcoded users loaded in memory.", flush=True)
+else:
+    print("[WARNING] Development/Demo mode: seeding default user accounts automatically.", flush=True)
+    _DEMO_CREDENTIALS = {
+        "admin@agentshield.com": {"password": "admin-password", "role": "Admin"},
+        "analyst@agentshield.com": {"password": "analyst-password", "role": "Security Analyst"},
+        "viewer@agentshield.com": {"password": "viewer-password", "role": "Viewer"},
     }
-
-# Clear plain-text passwords from memory immediately
-_CREDENTIALS.clear()
+    
+    for email, data in _DEMO_CREDENTIALS.items():
+        salt = os.urandom(16)
+        key = hashlib.pbkdf2_hmac("sha256", data["password"].encode("utf-8"), salt, 100000)
+        USER_DB[email] = {
+            "salt": salt,
+            "key": key,
+            "role": data["role"]
+        }
+    
+    # Clear plain-text passwords from memory immediately
+    _DEMO_CREDENTIALS.clear()
 
 
 def verify_password(plain_password: str, salt: bytes, hashed_key: bytes) -> bool:

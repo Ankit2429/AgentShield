@@ -215,7 +215,7 @@ export default function App() {
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px]" style={{ color: 'rgba(254,250,224,0.35)', strokeWidth: 1.5 }} />
                   <input
                     type="email"
                     required
@@ -240,7 +240,7 @@ export default function App() {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(254,250,224,0.35)' }} />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px]" style={{ color: 'rgba(254,250,224,0.35)', strokeWidth: 1.5 }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
@@ -263,7 +263,7 @@ export default function App() {
                     className="absolute right-3 top-1/2 -translate-y-1/2"
                     style={{ color: 'rgba(254,250,224,0.35)' }}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-[18px] h-[18px]" style={{ strokeWidth: 1.5 }} /> : <Eye className="w-[18px] h-[18px]" style={{ strokeWidth: 1.5 }} />}
                   </button>
                 </div>
               </div>
@@ -299,7 +299,7 @@ export default function App() {
                 ) : (
                   <>
                     Sign In
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-[18px] h-[18px]" style={{ strokeWidth: 1.5 }} />
                   </>
                 )}
               </button>
@@ -352,7 +352,7 @@ export default function App() {
         {/* Logo */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center gap-2.5">
-            <Shield className="w-5 h-5" style={{ color: '#4361EE' }} />
+            <Shield className="w-5 h-5" style={{ color: '#4361EE', strokeWidth: 1.5 }} />
             <span className="text-lg font-bold tracking-tight" style={{ color: '#FEFAE0', fontSize: '18px', fontWeight: 700, letterSpacing: '-0.01em' }}>
               AgentShield
             </span>
@@ -382,7 +382,7 @@ export default function App() {
                   color: isActive ? '#4361EE' : 'rgba(254, 250, 224, 0.6)',
                 }}
               >
-                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5 }} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -401,7 +401,7 @@ export default function App() {
             <div className="flex-1 text-left overflow-hidden">
               <p className="text-xs font-medium truncate" style={{ color: '#FEFAE0' }}>{currentUser.email}</p>
             </div>
-            <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <ChevronDown className="w-[18px] h-[18px] flex-shrink-0" style={{ color: 'rgba(254,250,224,0.35)', strokeWidth: 1.5 }} />
           </button>
 
           {userMenuOpen && (
@@ -411,14 +411,14 @@ export default function App() {
                 className="flex items-center gap-2.5 px-3 py-2 text-xs w-full text-left transition-colors hover:bg-white/[0.03]"
                 style={{ color: 'rgba(254,250,224,0.6)' }}
               >
-                <Settings className="w-4 h-4" /> Settings
+                <Settings className="w-[18px] h-[18px]" style={{ strokeWidth: 1.5 }} /> Settings
               </button>
               <button
                 onClick={() => { handleLogout(); setUserMenuOpen(false); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-xs w-full text-left transition-colors hover:bg-white/[0.03]"
                 style={{ color: '#E07A5F' }}
               >
-                <LogOut className="w-4 h-4" /> Sign Out
+                <LogOut className="w-[18px] h-[18px]" style={{ strokeWidth: 1.5 }} /> Sign Out
               </button>
             </div>
           )}
@@ -439,10 +439,10 @@ export default function App() {
             <div className="flex items-center space-x-2 rounded px-2.5 py-1" style={{ background: 'rgba(254,250,224,0.03)', border: '1px solid rgba(254,250,224,0.08)' }}>
               <span className={`inline-block w-1.5 h-1.5 rounded-full ${
                 healthStatus.status === 'ok' 
-                  ? 'bg-[#2A9D8F]' 
+                  ? 'bg-[#22c55e]' 
                   : healthStatus.status === 'connecting' 
-                    ? 'bg-[#F4A261] animate-pulse' 
-                    : 'bg-[#E07A5F]'
+                    ? 'bg-[#f59e0b] animate-pulse' 
+                    : 'bg-[#ef4444]'
               }`}></span>
               <span className="text-[10px] font-mono tracking-tight uppercase" style={{ color: 'rgba(254, 250, 224, 0.6)' }}>
                 {healthStatus.status === 'ok' ? 'nominal' : healthStatus.status}
@@ -464,7 +464,10 @@ export default function App() {
         {/* Viewport wrapper */}
         <main className="flex-grow p-6 flex flex-col relative bg-background">
           {activeTab === 'dashboard' && (
-            <DashboardView onNavigateToSession={navigateToSession} />
+            <DashboardView
+              onNavigateToSession={navigateToSession}
+              onNavigateToSandbox={() => setActiveTab('sandbox')}
+            />
           )}
           {activeTab === 'threats' && (
             <ThreatsView onNavigateToSession={navigateToSession} />

@@ -50,19 +50,22 @@ export default function ThreatsView({ onNavigateToSession }) {
 
   const getSeverity = (risk) => {
     if (risk === null || risk === undefined) return { label: 'LOW', color: 'text-zinc-450 bg-zinc-900 border border-white/[0.04]' };
-    if (risk >= 0.8) return { label: 'CRITICAL', color: 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20' };
-    if (risk >= 0.6) return { label: 'HIGH', color: 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20' };
-    if (risk >= 0.4) return { label: 'MEDIUM', color: 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20' };
-    return { label: 'LOW', color: 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20' };
+    if (risk >= 0.8) return { label: 'CRITICAL', color: 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20' };
+    if (risk >= 0.6) return { label: 'HIGH', color: 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20' };
+    if (risk >= 0.4) return { label: 'MEDIUM', color: 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20' };
+    return { label: 'LOW', color: 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20' };
   };
 
   const getVerdictStyle = (decision) => {
     if (!decision) return 'text-zinc-550 border border-white/[0.04] bg-white/[0.01]';
     const uppercase = decision.toUpperCase();
-    if (uppercase === 'BLOCK') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
-    if (uppercase === 'QUARANTINE') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
-    if (uppercase === 'REVIEW') return 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20';
-    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
+    if (uppercase === 'BLOCK' || uppercase === 'QUARANTINE' || uppercase === 'CRITICAL') {
+      return 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20';
+    }
+    if (uppercase === 'MONITOR' || uppercase === 'REVIEW' || uppercase.includes('WARNING')) {
+      return 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20';
+    }
+    return 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20';
   };
 
   // Filter based on selected UI dropdowns
@@ -112,14 +115,14 @@ export default function ThreatsView({ onNavigateToSession }) {
             color: '#FEFAE0'
           }}
         >
-          <RefreshCw className="w-3.5 h-3.5" />
+          <RefreshCw className="w-[18px] h-[18px]" strokeWidth={1.5} />
           Re-evaluate Threats
         </button>
       </div>
 
       {error && (
         <div className="p-4 bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-xl text-[#E07A5F] text-xs flex items-center space-x-2.5">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
           <span>{error}</span>
         </div>
       )}
@@ -162,7 +165,7 @@ export default function ThreatsView({ onNavigateToSession }) {
             onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
           />
-          <Search className="w-4 h-4 absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} />
+          <Search className="w-[18px] h-[18px] absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
         </div>
 
         <div className="flex gap-3">
@@ -183,7 +186,7 @@ export default function ThreatsView({ onNavigateToSession }) {
               <option value="MEDIUM">Medium (0.4 - 0.6)</option>
               <option value="LOW">Low (&lt; 0.4)</option>
             </select>
-            <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
           </div>
 
           <div className="relative">
@@ -202,7 +205,7 @@ export default function ThreatsView({ onNavigateToSession }) {
               <option value="QUARANTINED">Quarantined</option>
               <option value="REVIEW">Under Review</option>
             </select>
-            <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
           </div>
         </div>
       </div>

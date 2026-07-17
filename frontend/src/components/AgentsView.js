@@ -88,27 +88,28 @@ export default function AgentsView({ onNavigateToSession }) {
 
   const getStatusBadge = (status) => {
     const uppercase = status.toUpperCase();
-    if (uppercase === 'BLOCKED') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
-    if (uppercase === 'QUARANTINED') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
-    if (uppercase === 'SUSPICIOUS') return 'text-amber-400 bg-amber-500/10 border border-amber-500/20';
-    if (uppercase === 'MONITOR') return 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20';
-    if (uppercase === 'VERIFIED') return 'text-sky-400 bg-sky-500/10 border border-sky-500/20';
-    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
+    if (uppercase === 'BLOCKED' || uppercase === 'QUARANTINED') {
+      return 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20';
+    }
+    if (uppercase === 'SUSPICIOUS' || uppercase === 'MONITOR') {
+      return 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20';
+    }
+    return 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20';
   };
 
   const getTrendBadge = (trend) => {
     const uppercase = trend.toUpperCase();
     if (uppercase === 'IMPROVING') {
       return (
-        <span className="text-[#2A9D8F] font-medium text-[9px] flex items-center gap-0.5">
-          <TrendingUp className="w-3 h-3" /> Improving
+        <span className="text-[#22c55e] font-medium text-[9px] flex items-center gap-0.5">
+          <TrendingUp className="w-[18px] h-[18px]" strokeWidth={1.5} /> Improving
         </span>
       );
     }
     if (uppercase === 'DECLINING') {
       return (
-        <span className="text-[#E07A5F] font-medium text-[9px] flex items-center gap-0.5">
-          <TrendingDown className="w-3 h-3" /> Declining
+        <span className="text-[#ef4444] font-medium text-[9px] flex items-center gap-0.5">
+          <TrendingDown className="w-[18px] h-[18px]" strokeWidth={1.5} /> Declining
         </span>
       );
     }
@@ -147,7 +148,7 @@ export default function AgentsView({ onNavigateToSession }) {
               onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
             />
-            <Search className="w-4 h-4 absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <Search className="w-[18px] h-[18px] absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
           </div>
 
           <div className="relative">
@@ -169,7 +170,7 @@ export default function AgentsView({ onNavigateToSession }) {
               <option value="QUARANTINED">QUARANTINED</option>
               <option value="BLOCKED">BLOCKED</option>
             </select>
-            <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <ChevronDown className="w-[18px] h-[18px] absolute right-2.5 top-2.5 pointer-events-none" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
           </div>
         </div>
 
@@ -207,7 +208,11 @@ export default function AgentsView({ onNavigateToSession }) {
                     {agent.security_grade}
                   </span>
                   <span className={`px-1.5 py-0.5 text-[8px] font-bold rounded-md uppercase border ${
-                    agent.status === 'BLOCKED' ? 'text-[#E07A5F] border-[#E07A5F]/20 bg-[#E07A5F]/5' : 'text-zinc-550 border-white/[0.08] bg-white/[0.03]'
+                    agent.status === 'BLOCKED' || agent.status === 'QUARANTINED'
+                      ? 'text-[#ef4444] border-[#ef4444]/20 bg-[#ef4444]/5'
+                      : agent.status === 'MONITOR' || agent.status === 'SUSPICIOUS'
+                        ? 'text-[#f59e0b] border-[#f59e0b]/20 bg-[#f59e0b]/5'
+                        : 'text-[#22c55e] border-[#22c55e]/20 bg-[#22c55e]/5'
                   }`}>
                     {agent.status}
                   </span>
@@ -222,7 +227,7 @@ export default function AgentsView({ onNavigateToSession }) {
       <div className="flex-1 flex flex-col rounded-2xl border overflow-hidden min-h-[500px]" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
         {!selectedAgent ? (
           <div className="flex-grow flex flex-col items-center justify-center p-12 text-center" style={{ color: 'rgba(254,250,224,0.35)' }}>
-            <Shield className="w-8 h-8 mb-3" style={{ color: 'rgba(254,250,224,0.15)' }} />
+            <Shield className="w-6 h-6 mb-3" style={{ color: 'rgba(254,250,224,0.15)' }} strokeWidth={1.5} />
             <p className="text-[11px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Select an agent profile from the registry to view reputation analysis.</p>
           </div>
         ) : (
@@ -288,28 +293,28 @@ export default function AgentsView({ onNavigateToSession }) {
                         <div className="w-full h-full bg-white/[0.05]" title="No request telemetry"></div>
                       ) : (
                         <>
-                          <div style={{ width: `${successPct}%` }} className="h-full bg-[#2A9D8F]/80" title="Successful Requests"></div>
-                          <div style={{ width: `${suspPct}%` }} className="h-full bg-[#F4A261]/80" title="Suspicious Requests"></div>
-                          <div style={{ width: `${blockPct}%` }} className="h-full bg-[#E07A5F]/80" title="Blocked Requests"></div>
+                          <div style={{ width: `${successPct}%` }} className="h-full bg-[#22c55e]/80" title="Successful Requests"></div>
+                          <div style={{ width: `${suspPct}%` }} className="h-full bg-[#f59e0b]/80" title="Suspicious Requests"></div>
+                          <div style={{ width: `${blockPct}%` }} className="h-full bg-[#ef4444]/80" title="Blocked Requests"></div>
                         </>
                       )}
                     </div>
-
+ 
                     {/* Telemetry indices */}
                     <div className="grid grid-cols-3 gap-4 text-center text-[10px]">
                       <div className="p-2 border rounded-lg" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
                         <span className="block mb-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Successful</span>
-                        <span className="font-bold text-xs font-mono" style={{ color: '#2A9D8F' }}>{selectedAgent.successful_requests}</span>
+                        <span className="font-bold text-xs font-mono" style={{ color: '#22c55e' }}>{selectedAgent.successful_requests}</span>
                         <span className="block mt-0.5 font-mono" style={{ color: 'rgba(254,250,224,0.2)' }}>({successPct.toFixed(1)}%)</span>
                       </div>
                       <div className="p-2 border rounded-lg" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
                         <span className="block mb-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Suspicious</span>
-                        <span className="font-bold text-xs font-mono" style={{ color: '#F4A261' }}>{selectedAgent.suspicious_requests}</span>
+                        <span className="font-bold text-xs font-mono" style={{ color: '#f59e0b' }}>{selectedAgent.suspicious_requests}</span>
                         <span className="block mt-0.5 font-mono" style={{ color: 'rgba(254,250,224,0.2)' }}>({suspPct.toFixed(1)}%)</span>
                       </div>
                       <div className="p-2 border rounded-lg" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
                         <span className="block mb-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Blocked</span>
-                        <span className="font-bold text-xs font-mono" style={{ color: '#E07A5F' }}>{selectedAgent.blocked_requests}</span>
+                        <span className="font-bold text-xs font-mono" style={{ color: '#ef4444' }}>{selectedAgent.blocked_requests}</span>
                         <span className="block mt-0.5 font-mono" style={{ color: 'rgba(254,250,224,0.2)' }}>({blockPct.toFixed(1)}%)</span>
                       </div>
                     </div>
@@ -361,7 +366,11 @@ export default function AgentsView({ onNavigateToSession }) {
                           </td>
                           <td className="px-4 py-2.5 font-sans">
                             <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded-md uppercase border ${
-                              session.final_decision === 'BLOCK' ? 'text-[#E07A5F] border-[#E07A5F]/20 bg-[#E07A5F]/5' : 'text-zinc-550 border-white/[0.08] bg-white/[0.03]'
+                              session.final_decision === 'BLOCK' || session.final_decision === 'QUARANTINE' 
+                                ? 'text-[#ef4444] border-[#ef4444]/20 bg-[#ef4444]/5' 
+                                : session.final_decision === 'MONITOR' || session.final_decision === 'REVIEW'
+                                  ? 'text-[#f59e0b] border-[#f59e0b]/20 bg-[#f59e0b]/5'
+                                  : 'text-[#22c55e] border-[#22c55e]/20 bg-[#22c55e]/5'
                             }`} style={{ fontFamily: 'var(--font-display)' }}>
                               {session.final_decision || 'PENDING'}
                             </span>

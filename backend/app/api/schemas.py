@@ -194,6 +194,7 @@ class DecisionSummary(BaseModel):
     recommendation: str
     reason_codes: list[str] = Field(default_factory=list)
     explanation: str
+    risk_score: float
 
 
 class AnalyzeResponse(BaseModel):

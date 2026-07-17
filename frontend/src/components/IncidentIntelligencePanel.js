@@ -26,17 +26,19 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
   const getVerdictStyle = (dec) => {
     if (!dec) return 'text-zinc-550 bg-[#0c0c0e]/50 border-white/[0.04]';
     const uppercase = dec.toUpperCase();
-    if (uppercase === 'BLOCK') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
-    if (uppercase === 'QUARANTINE') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
-    if (uppercase === 'REVIEW') return 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20';
-    if (uppercase === 'MONITOR') return 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20';
-    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
+    if (uppercase === 'BLOCK' || uppercase === 'QUARANTINE' || uppercase === 'CRITICAL') {
+      return 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20';
+    }
+    if (uppercase === 'MONITOR' || uppercase === 'REVIEW' || uppercase.includes('WARNING')) {
+      return 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20';
+    }
+    return 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20';
   };
 
   const getRiskColor = (risk) => {
-    if (risk >= 0.8) return 'text-[#E07A5F] font-semibold';
-    if (risk >= 0.4) return 'text-[#F4A261]';
-    if (risk > 0.0) return 'text-[#4361EE]';
+    if (risk >= 0.8) return 'text-[#ef4444] font-semibold';
+    if (risk >= 0.4) return 'text-[#f59e0b]';
+    if (risk > 0.0) return 'text-[#22c55e]';
     return 'text-zinc-550';
   };
 
@@ -93,7 +95,7 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
                 </ul>
               </div>
             ) : (
-              <span className="text-[#2A9D8F] text-xs font-semibold block">Clean: No exploit signatures triggered.</span>
+              <span className="text-[#22c55e] text-xs font-semibold block">Clean: No exploit signatures triggered.</span>
             )}
           </div>
 
@@ -141,8 +143,8 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-1 text-center">
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
             <span className="text-zinc-550 text-[9px] block">Risk Index</span>
-            <span className={`text-sm font-bold block mt-1.5 font-mono ${getRiskColor(detection.risk_score)}`}>
-              {detection.risk_score.toFixed(3)}
+            <span className={`text-sm font-bold block mt-1.5 font-mono ${getRiskColor(decision.risk_score ?? detection.risk_score)}`}>
+              {(decision.risk_score ?? detection.risk_score).toFixed(3)}
             </span>
           </div>
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>

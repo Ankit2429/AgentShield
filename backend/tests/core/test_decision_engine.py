@@ -59,3 +59,4 @@ def test_decision_interceptor_context(decision_engine):
     assert result.decision == Decision.BLOCK
     assert ReasonCode.UNAUTHORIZED_TOOL_ACCESS in result.reasoning
     assert result.severity == DecisionSeverity.HIGH
+    assert result.risk_score == 1.0

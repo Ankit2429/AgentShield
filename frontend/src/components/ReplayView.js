@@ -57,7 +57,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
           agent_id: msg.data.agent_id,
           started_at: msg.data.timestamp,
           final_decision: msg.data.decision.decision,
-          peak_risk_score: msg.data.detection.risk_score,
+          peak_risk_score: msg.data.decision.risk_score ?? msg.data.detection.risk_score,
           status: 'COMPLETE'
         };
 
@@ -112,29 +112,31 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
   const getVerdictStyle = (decision) => {
     if (!decision) return 'text-zinc-550 bg-white/[0.01] border border-white/[0.04]';
     const uppercase = decision.toUpperCase();
-    if (uppercase === 'BLOCK') return 'text-[#E07A5F] bg-[#E07A5F]/10 border border-[#E07A5F]/20';
-    if (uppercase === 'QUARANTINE') return 'text-[#F4A261] bg-[#F4A261]/10 border border-[#F4A261]/20';
-    if (uppercase === 'REVIEW') return 'text-[#4CC9F0] bg-[#4CC9F0]/10 border border-[#4CC9F0]/20';
-    if (uppercase === 'MONITOR') return 'text-[#4361EE] bg-[#4361EE]/10 border border-[#4361EE]/20';
-    return 'text-[#2A9D8F] bg-[#2A9D8F]/10 border border-[#2A9D8F]/20';
+    if (uppercase === 'BLOCK' || uppercase === 'QUARANTINE' || uppercase === 'CRITICAL') {
+      return 'text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20';
+    }
+    if (uppercase === 'MONITOR' || uppercase === 'REVIEW' || uppercase.includes('WARNING')) {
+      return 'text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/20';
+    }
+    return 'text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20';
   };
 
   const getRiskColor = (risk) => {
     if (risk === null || risk === undefined) return 'text-zinc-550';
-    if (risk >= 0.8) return 'text-[#E07A5F] font-semibold';
-    if (risk >= 0.4) return 'text-[#F4A261]';
-    if (risk > 0.0) return 'text-[#4361EE]';
+    if (risk >= 0.8) return 'text-[#ef4444] font-semibold';
+    if (risk >= 0.4) return 'text-[#f59e0b]';
+    if (risk > 0.0) return 'text-[#22c55e]';
     return 'text-zinc-550';
   };
 
   const getStageBadge = (stage) => {
     switch (stage) {
       case 'RECEIVED': return 'bg-white/[0.03] border-white/[0.08] text-zinc-400';
-      case 'DETECTED': return 'bg-[#E07A5F]/10 border-[#E07A5F]/25 text-[#E07A5F]';
-      case 'BEHAVIOR_ANALYZED': return 'bg-[#4361EE]/10 border-[#4361EE]/25 text-[#4361EE]';
+      case 'DETECTED': return 'bg-[#ef4444]/10 border-[#ef4444]/25 text-[#ef4444]';
+      case 'BEHAVIOR_ANALYZED': return 'bg-[#f59e0b]/10 border-[#f59e0b]/25 text-[#f59e0b]';
       case 'TRUST_UPDATED': return 'bg-[#4CC9F0]/10 border-[#4CC9F0]/25 text-[#4CC9F0]';
       case 'DECISION_MADE': return 'bg-violet-500/10 border-violet-500/25 text-violet-400';
-      case 'AUDITED': return 'bg-[#2A9D8F]/10 border-[#2A9D8F]/25 text-[#2A9D8F]';
+      case 'AUDITED': return 'bg-[#22c55e]/10 border-[#22c55e]/25 text-[#22c55e]';
       default: return 'bg-white/[0.03] border-white/[0.08] text-zinc-400';
     }
   };
@@ -162,7 +164,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
               onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
             />
-            <Search className="w-4 h-4 absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} />
+            <Search className="w-[18px] h-[18px] absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} strokeWidth={1.5} />
           </div>
 
           <div className="flex rounded-lg p-0.5 border text-[9px]" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)', fontFamily: 'var(--font-display)' }}>
@@ -234,7 +236,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
           </div>
         ) : !activeSession ? (
           <div className="flex-grow flex flex-col items-center justify-center p-12 text-center" style={{ color: 'rgba(254,250,224,0.35)' }}>
-            <PlayCircle className="w-8 h-8 mb-3" style={{ color: 'rgba(254,250,224,0.15)' }} />
+            <PlayCircle className="w-6 h-6 mb-3" style={{ color: 'rgba(254,250,224,0.15)' }} strokeWidth={1.5} />
             <p className="text-[11px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Select an active incident from the interception log to analyze details.</p>
           </div>
         ) : (
@@ -246,7 +248,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                   <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Session Audit /</span>
                   <h2 className="text-sm font-bold font-mono" style={{ color: '#FEFAE0' }}>{activeSession.session_id.substring(0, 8)}</h2>
                   <span className={`px-2 py-0.5 text-[9px] font-semibold rounded uppercase ${
-                    activeSession.status === 'COMPLETE' ? 'bg-[#2A9D8F]/15 text-[#2A9D8F] border border-[#2A9D8F]/20' : 'bg-[#E07A5F]/15 text-[#E07A5F] border border-[#E07A5F]/20'
+                    activeSession.status === 'COMPLETE' ? 'bg-[#22c55e]/15 text-[#22c55e] border border-[#22c55e]/20' : 'bg-[#ef4444]/15 text-[#ef4444] border border-[#ef4444]/20'
                   }`} style={{ fontFamily: 'var(--font-display)' }}>
                     {activeSession.status}
                   </span>
@@ -332,8 +334,9 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                               </span>
                             )}
                             <ChevronDown
-                              className="w-4 h-4 transition-transform duration-150"
+                              className="w-[18px] h-[18px] transition-transform duration-150"
                               style={{ color: 'rgba(254,250,224,0.35)', transform: isExpanded ? 'rotate(180deg)' : 'none' }}
+                              strokeWidth={1.5}
                             />
                           </div>
                         </div>
