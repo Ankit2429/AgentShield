@@ -22,32 +22,39 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-# Predefined user access credentials database.
-# IMPORTANT: Demo/development credentials must ONLY be loaded in development/testing mode.
-# In production, this dictionary is empty by default unless populated via a secure backing database.
+# ---------------------------------------------------------------------------
+# User credential store
+# ---------------------------------------------------------------------------
+# In non-demo production the dict stays empty; a real backing database would
+# be wired in here via [STORAGE] extension point.
+#
+# Seeding rules:
+#   APP_ENV != production  → always seed (local dev / CI)
+#   APP_ENV == production
+#     DEMO_MODE=true       → seed  (hackathon / hosted demo)
+#     DEMO_MODE=false      → skip  (real production with a proper user DB)
+# ---------------------------------------------------------------------------
 USER_DB: dict[str, dict[str, Any]] = {}
 
-if settings.APP_ENV == "production":
-    print("[INFO] Production mode: demo credentials are disabled. No hardcoded users loaded in memory.", flush=True)
-else:
-    print("[WARNING] Development/Demo mode: seeding default user accounts automatically.", flush=True)
+_should_seed = (settings.APP_ENV != "production") or settings.DEMO_MODE
+
+if _should_seed:
+    _mode_label = "Development/Demo" if settings.APP_ENV != "production" else "Production+DEMO_MODE"
+    print(f"[AUTH] {_mode_label}: seeding demo user accounts (APP_ENV={settings.APP_ENV}, DEMO_MODE={settings.DEMO_MODE}).", flush=True)
     _DEMO_CREDENTIALS = {
-        "admin@agentshield.com": {"password": "admin-password", "role": "Admin"},
-        "analyst@agentshield.com": {"password": "analyst-password", "role": "Security Analyst"},
-        "viewer@agentshield.com": {"password": "viewer-password", "role": "Viewer"},
+        "admin@agentshield.com":    {"password": "admin-password",    "role": "Admin"},
+        "analyst@agentshield.com":  {"password": "analyst-password",  "role": "Security Analyst"},
+        "viewer@agentshield.com":   {"password": "viewer-password",   "role": "Viewer"},
     }
-    
     for email, data in _DEMO_CREDENTIALS.items():
         salt = os.urandom(16)
         key = hashlib.pbkdf2_hmac("sha256", data["password"].encode("utf-8"), salt, 100000)
-        USER_DB[email] = {
-            "salt": salt,
-            "key": key,
-            "role": data["role"]
-        }
-    
-    # Clear plain-text passwords from memory immediately
-    _DEMO_CREDENTIALS.clear()
+        USER_DB[email] = {"salt": salt, "key": key, "role": data["role"]}
+    _DEMO_CREDENTIALS.clear()  # Wipe plain-text passwords from memory immediately
+    print(f"[AUTH] Demo accounts seeded: {list(USER_DB.keys())}", flush=True)
+else:
+    print(f"[AUTH] Production mode (DEMO_MODE=False): USER_DB is empty. "
+          "Set DEMO_MODE=true to enable demo accounts on this deployment.", flush=True)
 
 
 def verify_password(plain_password: str, salt: bytes, hashed_key: bytes) -> bool:

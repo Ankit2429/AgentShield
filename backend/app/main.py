@@ -43,10 +43,21 @@ async def lifespan(app: FastAPI):
     """Application startup / shutdown lifecycle handler.
 
     On startup:
-    - If DEMO_MODE is enabled and no sessions exist, runs the demo seeder to
-      populate the dashboard with realistic agent data so a first-time user
-      never sees an empty state.
+    - Logs the active APP_ENV and DEMO_MODE so the deployment configuration
+      is always visible in production log streams (Render, Railway, etc.).
+    - If DEMO_MODE is enabled, runs the demo seeder to populate the dashboard
+      with realistic agent data so a first-time user never sees an empty state.
     """
+    # ── Startup environment audit (visible in Render / Railway logs) ──────────
+    from app.api.routers.auth import USER_DB
+    _logger.info(
+        "[STARTUP] AgentShield booting — APP_ENV=%s | DEMO_MODE=%s | USER_DB accounts=%d %s",
+        settings.APP_ENV,
+        settings.DEMO_MODE,
+        len(USER_DB),
+        list(USER_DB.keys()) if USER_DB else "(empty — login will fail unless DEMO_MODE=true)"
+    )
+
     if settings.DEMO_MODE:
         _logger.info("[STARTUP] DEMO_MODE=True — running demo data seeder...")
         try:
@@ -55,7 +66,7 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             _logger.error("[STARTUP] Demo seeder failed (non-fatal): %s", exc)
     else:
-        _logger.info("[STARTUP] DEMO_MODE=False — skipping demo seed.")
+        _logger.info("[STARTUP] DEMO_MODE=False — skipping demo data seed.")
 
     yield  # Application is now running
 
