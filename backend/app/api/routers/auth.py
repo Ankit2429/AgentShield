@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import sys
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -40,7 +41,8 @@ _should_seed = (settings.APP_ENV != "production") or settings.DEMO_MODE
 
 if _should_seed:
     _mode_label = "Development/Demo" if settings.APP_ENV != "production" else "Production+DEMO_MODE"
-    print(f"[AUTH] {_mode_label}: seeding demo user accounts (APP_ENV={settings.APP_ENV}, DEMO_MODE={settings.DEMO_MODE}).", flush=True)
+    sys.stderr.write(f"[AUTH] {_mode_label}: seeding demo user accounts (APP_ENV={settings.APP_ENV}, DEMO_MODE={settings.DEMO_MODE}).\n")
+    sys.stderr.flush()
     _DEMO_CREDENTIALS = {
         "admin@agentshield.com":    {"password": "admin-password",    "role": "Admin"},
         "analyst@agentshield.com":  {"password": "analyst-password",  "role": "Security Analyst"},
@@ -51,10 +53,17 @@ if _should_seed:
         key = hashlib.pbkdf2_hmac("sha256", data["password"].encode("utf-8"), salt, 100000)
         USER_DB[email] = {"salt": salt, "key": key, "role": data["role"]}
     _DEMO_CREDENTIALS.clear()  # Wipe plain-text passwords from memory immediately
-    print(f"[AUTH] Demo accounts seeded: {list(USER_DB.keys())}", flush=True)
+    sys.stderr.write(f"[AUTH] Demo accounts seeded: {list(USER_DB.keys())}\n")
+    sys.stderr.write(f"[AUTH] Demo users seeded: YES  (count={len(USER_DB)})\n")
+    sys.stderr.flush()
 else:
-    print(f"[AUTH] Production mode (DEMO_MODE=False): USER_DB is empty. "
-          "Set DEMO_MODE=true to enable demo accounts on this deployment.", flush=True)
+    sys.stderr.write(
+        f"[AUTH] APP_ENV={settings.APP_ENV} | DEMO_MODE={settings.DEMO_MODE}\n"
+        f"[AUTH] Demo users seeded: NO\n"
+        f"[AUTH] USER_DB is EMPTY — login will fail for all accounts.\n"
+        f"[AUTH] ACTION REQUIRED: set DEMO_MODE=true in Render environment variables.\n"
+    )
+    sys.stderr.flush()
 
 
 def verify_password(plain_password: str, salt: bytes, hashed_key: bytes) -> bool:

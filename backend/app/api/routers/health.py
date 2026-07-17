@@ -28,8 +28,11 @@ TODO [METRICS]:     Expose a ``/metrics`` endpoint compatible with Prometheus
 from __future__ import annotations
 
 import time
+import hashlib
+import hmac
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 
 from app.api.deps import (
     get_decision_engine,
@@ -99,3 +102,53 @@ def health_check(
         uptime_seconds=round(uptime, 3),
         engines=engines,
     )
+
+
+@router.get(
+    "/debug/startup",
+    summary="Startup Diagnostics",
+    description=(
+        "Returns runtime values for APP_ENV, DEMO_MODE, USER_DB contents, "
+        "and a live login trace. Used to confirm production configuration. "
+        "Remove or restrict this endpoint before a real production launch."
+    ),
+    include_in_schema=True,
+)
+def debug_startup() -> JSONResponse:
+    """Return live runtime values — lets us confirm Render env vars without relying on log scrollback."""
+    from app.config import settings
+    from app.api.routers.auth import USER_DB, verify_password
+
+    seeded_emails = list(USER_DB.keys())
+
+    # Trace the admin login without issuing a real token
+    test_email = "admin@agentshield.com"
+    test_password = "admin-password"
+    user = USER_DB.get(test_email)
+    if user:
+        pw_ok = verify_password(test_password, user["salt"], user["key"])
+        login_result = "HTTP 200 OK — credentials correct" if pw_ok else "HTTP 401 — wrong password"
+    else:
+        login_result = "HTTP 401 — user not found (USER_DB is empty)"
+
+    return JSONResponse({
+        "app_env":          settings.APP_ENV,
+        "demo_mode":        settings.DEMO_MODE,
+        "user_db_count":    len(USER_DB),
+        "user_db_emails":   seeded_emails,
+        "demo_users_seeded": "YES" if USER_DB else "NO",
+        "users_expected": [
+            "admin@agentshield.com",
+            "analyst@agentshield.com",
+            "viewer@agentshield.com",
+        ],
+        "users_missing": [
+            e for e in ["admin@agentshield.com", "analyst@agentshield.com", "viewer@agentshield.com"]
+            if e not in USER_DB
+        ],
+        "login_trace": {
+            "username":        test_email,
+            "user_found":      user is not None,
+            "password_result": login_result,
+        },
+    })
