@@ -181,7 +181,8 @@ async def analyze(
         interceptor_findings = interceptor_res.get("findings", [])
 
         # ── 2. Detection ──────────────────────────────────────────────────────
-        await asyncio.sleep(0.3)
+        if settings.DEMO_MODE:
+            await asyncio.sleep(0.3)
         det_result = detection_engine.analyze(event.message)
         event = enrich(event, detection_result=det_result)
 
@@ -199,7 +200,8 @@ async def analyze(
         })
 
         # ── 3. Behavioral DNA ─────────────────────────────────────────────────
-        await asyncio.sleep(0.3)
+        if settings.DEMO_MODE:
+            await asyncio.sleep(0.3)
         obs = obs_from_event(event)
         dna_engine.register_observation(event.agent_id, obs)
         ba = dna_engine.analyze_behavior(event.agent_id, obs)
@@ -220,7 +222,8 @@ async def analyze(
         })
 
         # ── 4. Trust ──────────────────────────────────────────────────────────
-        await asyncio.sleep(0.3)
+        if settings.DEMO_MODE:
+            await asyncio.sleep(0.3)
         # Register agent pre-decision so that behavior/policy can be computed
         trust_profile = trust_engine.register_agent(event.agent_id)
         event = enrich(event, trust_profile=trust_profile)
@@ -242,7 +245,8 @@ async def analyze(
         })
 
         # ── 5. Decision ───────────────────────────────────────────────────────
-        await asyncio.sleep(0.3)
+        if settings.DEMO_MODE:
+            await asyncio.sleep(0.3)
         eval_context = {
             "identity_spoofed": identity_spoofed,
             "auth_matrix_authorized": auth_matrix_authorized,
@@ -295,7 +299,8 @@ async def analyze(
         })
 
         # ── 6. Build and complete replay session ──────────────────────────────
-        await asyncio.sleep(0.3)
+        if settings.DEMO_MODE:
+            await asyncio.sleep(0.3)
         for frame in timeline_builder.build(event):
             replay_engine.add_frame(session.session_id, frame)
         summary = TimelineBuilder.generate_summary(event)
