@@ -530,14 +530,44 @@ export default function SandboxView({ onNavigateToSession }) {
                   </div>
                   <h2 className="text-base font-bold flex items-center gap-1.5 mt-1" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>
                     {(() => {
-                      const codes = result.decision?.reason_codes || [];
-                      const isUnknownAgent = codes.includes('UNKNOWN_AGENT');
-                      if (isUnknownAgent) {
+                      const codes   = result.decision?.reason_codes || [];
+                      const threats = result.detection?.threats || [];
+                      const dec     = result.decision?.decision;
+                      const risk    = result.decision?.risk_score ?? 0;
+                      const isMal   = result.detection?.is_malicious;
+
+                      // Priority 1: Zero-Trust onboarding block
+                      if (codes.includes('UNKNOWN_AGENT')) {
                         return <><Shield className="w-[18px] h-[18px] text-amber-400" strokeWidth={1.5} />ZERO-TRUST ONBOARDING BLOCK</>;
                       }
-                      return <><ShieldAlert className="w-[18px] h-[18px]" style={{ color: result.detection?.is_malicious ? '#ef4444' : '#22c55e' }} strokeWidth={1.5} />{result.detection?.is_malicious ? 'MALICIOUS TRANSACTION TRIGGERED' : 'BENIGN USER QUERY'}</>;
+
+                      // Priority 2: Active BLOCK decision
+                      if (dec === 'BLOCK') {
+                        if (isMal || risk >= 0.8 || threats.length > 0) {
+                          return <><ShieldAlert className="w-[18px] h-[18px] text-[#ef4444]" strokeWidth={1.5} />MALICIOUS TRANSACTION BLOCKED</>;
+                        }
+                        // BLOCK by policy / authorization even if not flagged malicious
+                        return <><ShieldAlert className="w-[18px] h-[18px] text-[#f59e0b]" strokeWidth={1.5} />POLICY VIOLATION — ACCESS DENIED</>;
+                      }
+
+                      // Priority 3: MONITOR decision
+                      if (dec === 'MONITOR') {
+                        if (isMal || threats.length > 0) {
+                          return <><ShieldAlert className="w-[18px] h-[18px] text-[#f59e0b]" strokeWidth={1.5} />SUSPICIOUS ACTIVITY — UNDER REVIEW</>;
+                        }
+                        return <><ShieldAlert className="w-[18px] h-[18px] text-[#f59e0b]" strokeWidth={1.5} />ELEVATED RISK — MONITORING ACTIVE</>;
+                      }
+
+                      // Priority 4: ALLOW but detector found threats
+                      if (isMal || threats.length > 0) {
+                        return <><ShieldAlert className="w-[18px] h-[18px] text-[#f59e0b]" strokeWidth={1.5} />THREAT DETECTED — ALLOWED BY POLICY</>;
+                      }
+
+                      // Priority 5: Clean transaction
+                      return <><ShieldAlert className="w-[18px] h-[18px] text-[#22c55e]" strokeWidth={1.5} />BENIGN USER QUERY</>;
                     })()}
                   </h2>
+
                 </div>
                 <div className="text-right">
                   <span className={`px-2.5 py-1 text-xs font-bold rounded-lg uppercase border ${getVerdictBadge(result.decision?.decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
