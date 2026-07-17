@@ -21,6 +21,10 @@ class AuthMatrix:
             "agent-support": "support_agent",
             "agent-db": "database_agent",
             "agent-viewer": "viewer_agent",
+            "agent-viewer-01": "viewer_agent",
+            "agent-analyst-02": "support_agent",
+            "agent-suspect-03": "viewer_agent",
+            "agent-unknown-04": "viewer_agent",
         }
 
         # Define tool permission scopes per agent role
