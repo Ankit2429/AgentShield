@@ -4,8 +4,8 @@ from app.main import app
 client = TestClient(app)
 
 def test_login_success():
-    response = client.post("/api/v1/auth/login", json={
-        "email": "admin@agentshield.com",
+    response = client.post("/api/v1/auth/login", data={
+        "username": "admin@agentshield.com",
         "password": "admin-password"
     })
     assert response.status_code == 200
@@ -15,16 +15,16 @@ def test_login_success():
     assert data["token_type"] == "bearer"
 
 def test_login_failure():
-    response = client.post("/api/v1/auth/login", json={
-        "email": "admin@agentshield.com",
+    response = client.post("/api/v1/auth/login", data={
+        "username": "admin@agentshield.com",
         "password": "wrong-password"
     })
     assert response.status_code == 401
     assert "detail" in response.json()
 
 def test_me_endpoint():
-    login = client.post("/api/v1/auth/login", json={
-        "email": "admin@agentshield.com",
+    login = client.post("/api/v1/auth/login", data={
+        "username": "admin@agentshield.com",
         "password": "admin-password"
     }).json()
     token = login["access_token"]
@@ -36,8 +36,8 @@ def test_me_endpoint():
     assert data["role"] == "Admin"
 
 def test_refresh_token():
-    login = client.post("/api/v1/auth/login", json={
-        "email": "admin@agentshield.com",
+    login = client.post("/api/v1/auth/login", data={
+        "username": "admin@agentshield.com",
         "password": "admin-password"
     }).json()
     refresh_token = login["refresh_token"]

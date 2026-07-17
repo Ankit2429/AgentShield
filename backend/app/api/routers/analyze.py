@@ -159,27 +159,27 @@ async def analyze(
         }
     })
 
-    # Claimed role can be provided in metadata (defaults to 'viewer_agent')
-    claimed_role = request.metadata.get("agent_role") or "viewer_agent"
-    identity_spoofed = not auth_matrix.verify_agent_identity(event.agent_id, claimed_role)
-
-    # Capability Matrix Check (prevents Tool Abuse & Unauthorized Tool Calls)
-    auth_matrix_authorized = True
-    if event.requested_tool:
-        resource = request.metadata.get("resource") or "default_resource"
-        auth_matrix_authorized = auth_matrix.check_authorization(claimed_role, event.requested_tool, resource)
-
-    # Interceptor checks (Indirect Prompt Injection, Loops, Cross-Agent, Exfil)
-    interceptor_res = message_interceptor.intercept_message(
-        message=event.message,
-        session_id=session.session_id,
-        agent_id=event.agent_id,
-        requested_tool=event.requested_tool,
-        context=request.metadata,
-    )
-    interceptor_findings = interceptor_res.get("findings", [])
-
     try:
+        # Claimed role can be provided in metadata (defaults to 'viewer_agent')
+        claimed_role = request.metadata.get("agent_role") or "viewer_agent"
+        identity_spoofed = not auth_matrix.verify_agent_identity(event.agent_id, claimed_role)
+
+        # Capability Matrix Check (prevents Tool Abuse & Unauthorized Tool Calls)
+        auth_matrix_authorized = True
+        if event.requested_tool:
+            resource = request.metadata.get("resource") or "default_resource"
+            auth_matrix_authorized = auth_matrix.check_authorization(claimed_role, event.requested_tool, resource)
+
+        # Interceptor checks (Indirect Prompt Injection, Loops, Cross-Agent, Exfil)
+        interceptor_res = message_interceptor.intercept_message(
+            message=event.message,
+            session_id=session.session_id,
+            agent_id=event.agent_id,
+            requested_tool=event.requested_tool,
+            context=request.metadata,
+        )
+        interceptor_findings = interceptor_res.get("findings", [])
+
         # ── 2. Detection ──────────────────────────────────────────────────────
         await asyncio.sleep(0.3)
         det_result = detection_engine.analyze(event.message)
@@ -221,14 +221,11 @@ async def analyze(
 
         # ── 4. Trust ──────────────────────────────────────────────────────────
         await asyncio.sleep(0.3)
+        # Register agent pre-decision so that behavior/policy can be computed
         trust_profile = trust_engine.register_agent(event.agent_id)
-        if det_result.is_malicious:
-            trust_profile = trust_engine.record_block(event.agent_id)
-        else:
-            trust_profile = trust_engine.record_success(event.agent_id)
         event = enrich(event, trust_profile=trust_profile)
 
-        # Broadcast Stage 4: TRUST
+        # Broadcast Stage 4: TRUST (Preliminary trust snapshot with pre-decision state)
         await ws_manager.broadcast({
             "type": "pipeline_progress",
             "stage": "TRUST",
@@ -251,6 +248,7 @@ async def analyze(
             "auth_matrix_authorized": auth_matrix_authorized,
             "interceptor_findings": interceptor_findings,
         }
+        # Pass pre-decision trust profile into decide()
         decision_result = decision_engine.decide(
             detection_result=det_result,
             trust_profile=trust_profile,
@@ -270,6 +268,29 @@ async def analyze(
                 "confidence": decision_result.confidence,
                 "severity": decision_result.severity.value,
                 "explanation": decision_result.explanation
+            }
+        })
+
+        # Record trust outcome after decision based on decision outcome
+        if decision_result.decision.value in ("BLOCK", "QUARANTINE"):
+            final_trust_profile = trust_engine.record_block(event.agent_id)
+        else:
+            final_trust_profile = trust_engine.record_success(event.agent_id)
+        event = enrich(event, trust_profile=final_trust_profile)
+
+        # Broadcast Stage 4: TRUST (Corrected/final trust update after decision)
+        await ws_manager.broadcast({
+            "type": "pipeline_progress",
+            "stage": "TRUST",
+            "agent_id": event.agent_id,
+            "session_id": session.session_id,
+            "data": {
+                "trust_score": final_trust_profile.trust_score,
+                "behavior_score": final_trust_profile.behavior_score,
+                "policy_score": final_trust_profile.policy_score,
+                "security_grade": final_trust_profile.security_grade,
+                "status": final_trust_profile.status.value,
+                "trend": final_trust_profile.trend.value
             }
         })
 

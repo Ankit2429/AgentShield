@@ -13,6 +13,7 @@ import hmac
 import json
 import threading
 import time
+import uuid
 from typing import Any, Optional
 
 
@@ -83,7 +84,7 @@ def create_token(
         "type": token_type,
         "iat": now,
         "exp": now + expires_in,
-        "jti": jti or f"jwt-{now}-{hash(subject) & 0xffffffff:08x}"
+        "jti": jti or f"jwt-{now}-{token_type}-{uuid.uuid4().hex}"
     }
 
     header_b64 = base64url_encode(json.dumps(header).encode("utf-8"))

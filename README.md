@@ -24,12 +24,17 @@ Real-time threat detection, behavioral DNA fingerprinting, dynamic trust scoring
 
 As AI agents become autonomous participants in enterprise workflows — calling tools, making decisions, and communicating with other agents — the attack surface expands beyond traditional application security.
 
-**AgentShield** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a four-stage security pipeline:
+**AgentShield** is a security intelligence platform purpose-built for this new threat landscape. It sits between AI agents in multi-agent systems, intercepting every interaction and running it through a comprehensive nine-stage security pipeline:
 
-1. **Detection** — Pattern-match against 20+ threat signatures (prompt injection, command injection, data exfiltration)
-2. **Behavioral DNA** — Build a statistical fingerprint of each agent's normal behavior and detect deviations
-3. **Trust Scoring** — Maintain a dynamic, weighted trust score per agent that evolves with every interaction
-4. **Decision** — Combine all intelligence signals into an explainable ALLOW / MONITOR / BLOCK / QUARANTINE decision
+1. **Replay Protection** — SHA-256 payload deduplication with a sliding window to reject duplicate/replayed requests.
+2. **Identity Verification** — Verify agent identity against expected roles to prevent identity spoofing.
+3. **Authorization Matrix** — Capability matrix tool-authorization checks to prevent unauthorized tool access.
+4. **Message Interceptor** — Scan message contents to detect recursive tool loops, indirect prompt injections, and data exfiltration.
+5. **Detection Engine** — Pattern-match against 20+ compiled threat signatures (prompt injection, command injection, exfiltration) with severity-weighted risk scoring.
+6. **Behavioral DNA Engine** — Build a statistical fingerprint of each agent's normal behavior and detect deviations.
+7. **Trust Engine** — Resolve agent reputation scores pre-decision, and record decision outcomes (success/block) post-decision.
+8. **Decision Engine** — Synthesize all prior threat, trust, and policy signals into an explainable security verdict (ALLOW / MONITOR / BLOCK / QUARANTINE).
+9. **Replay Engine** — Record a forensic frame-by-frame timeline of the interaction for analysis and auditing.
 
 Every interaction is recorded as a replayable timeline, enabling security analysts to investigate incidents frame-by-frame through the SOC dashboard.
 
@@ -112,11 +117,8 @@ graph TB
     VALIDATE --> REPLAY_API
     VALIDATE --> DASH
 
-    ANALYZE --> RP
-    ANALYZE --> MATRIX
-    ANALYZE --> INTERCEPT
-    ANALYZE --> DET --> DNA --> TRUST --> DEC
-    ANALYZE --> REPLAY
+    ANALYZE --> RP --> MATRIX --> INTERCEPT --> DET --> DNA --> TRUST --> DEC
+    DEC --> REPLAY
     DET --> EVENTS
     DNA --> EVENTS
     TRUST --> EVENTS
@@ -134,6 +136,8 @@ sequenceDiagram
     participant Auth as JWT Auth
     participant API as /analyze
     participant RP as Replay Protector
+    participant Matrix as Auth Matrix
+    participant Intercept as Message Interceptor
     participant Det as Detection Engine
     participant DNA as Behavior DNA
     participant Trust as Trust Engine
@@ -143,9 +147,20 @@ sequenceDiagram
 
     Client->>Auth: POST /api/v1/analyze (Bearer JWT)
     Auth->>API: Validated request
+    
     API->>RP: Check duplicate (event_id + payload hash)
     RP-->>API: Unique ✓
     API->>WS: Broadcast RECEIVED
+
+    Note over API,Intercept: Inside try/except evaluation block
+    API->>Matrix: Verify identity (Identity Spoofing Check)
+    Matrix-->>API: Verified ✓
+    
+    API->>Matrix: Check capability authorization (Tool Access Check)
+    Matrix-->>API: Authorized ✓
+    
+    API->>Intercept: Intercept message (Loops, indirect injection, exfiltration)
+    Intercept-->>API: No critical findings ✓
 
     API->>Det: Analyze message
     Det-->>API: DetectionResult (risk_score, threats)
@@ -155,15 +170,20 @@ sequenceDiagram
     DNA-->>API: BehaviorAnalysis (deviations)
     API->>WS: Broadcast BEHAVIOR
 
-    API->>Trust: Record event + update trust
-    Trust-->>API: AgentTrustProfile (trust_score)
-    API->>WS: Broadcast TRUST
+    API->>Trust: Register agent pre-decision
+    Trust-->>API: Pre-decision TrustProfile
+    API->>WS: Broadcast TRUST (preliminary)
 
     API->>Dec: Evaluate decision
-    Dec-->>API: DecisionResult (ALLOW/BLOCK + reasoning)
+    Dec-->>API: DecisionResult (ALLOW/BLOCK/QUARANTINE + reasoning)
     API->>WS: Broadcast DECISION
 
+    API->>Trust: Record block or success based on decision
+    Trust-->>API: Updated TrustProfile
+    API->>WS: Broadcast TRUST (final)
+
     API->>Replay: Record session + frames
+    API->>WS: Broadcast REPLAY
     API-->>Client: AnalyzeResponse (full result + session_id)
 ```
 

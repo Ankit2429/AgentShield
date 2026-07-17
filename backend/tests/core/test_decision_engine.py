@@ -1,61 +1,60 @@
 import pytest
-from app.core.decision_engine import DecisionEngine
-from app.core.models import DetectionResult, ThreatResult
-from app.core.behavior_dna import BehaviorAnalysis, DeviationLevel
-from app.core.trust_engine import AgentTrustProfile
+from app.core.decision_engine import DecisionEngine, Decision, ReasonCode
+from app.core.models import DetectionResult, ThreatResult, ThreatRule
+from app.core.severity import Severity
+from app.core.trust_engine import AgentTrustProfile, TrustStatus
 
 @pytest.fixture
 def decision_engine():
     return DecisionEngine()
 
 def test_decision_allow_normal(decision_engine):
-    detection = DetectionResult(is_malicious=False, risk_score=0.0, threats=[])
-    behavior = BehaviorAnalysis(deviation_level=DeviationLevel.NORMAL, details=[], confidence=1.0)
-    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, successful_requests=10)
+    detection = DetectionResult(is_malicious=False, risk_score=0.0, threat_count=0, threats=[])
+    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, status=TrustStatus.TRUSTED, successful_requests=10)
     
-    result = decision_engine.evaluate(detection, behavior, trust)
+    result = decision_engine.decide(detection_result=detection, trust_profile=trust)
     
-    assert result.decision.name == "ALLOW"
-    assert "LOW_RISK" in [r.code for r in result.reasons]
+    assert result.decision == Decision.ALLOW
+    assert ReasonCode.CLEAN in result.reasoning
 
 def test_decision_block_critical_threat(decision_engine):
     threat = ThreatResult(
-        rule_id="cmd_inj",
-        category="command_injection",
+        rule=ThreatRule(
+            pattern="rm -rf",
+            name="Destructive Remove Command",
+            description="...",
+            category="command_injection",
+            severity=Severity.CRITICAL
+        ),
         matched_text="rm -rf",
-        start_pos=0,
-        end_pos=5,
-        severity="CRITICAL"
+        position=0
     )
-    detection = DetectionResult(is_malicious=True, risk_score=1.0, threats=[threat])
-    behavior = BehaviorAnalysis(deviation_level=DeviationLevel.NORMAL, details=[], confidence=1.0)
-    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, successful_requests=10)
+    detection = DetectionResult(is_malicious=True, risk_score=1.0, threat_count=1, threats=[threat])
+    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, status=TrustStatus.TRUSTED, successful_requests=10)
     
-    result = decision_engine.evaluate(detection, behavior, trust)
+    result = decision_engine.decide(detection_result=detection, trust_profile=trust)
     
-    assert result.decision.name == "BLOCK"
-    assert "CRITICAL_THREAT_DETECTED" in [r.code for r in result.reasons]
+    assert result.decision == Decision.BLOCK
+    assert ReasonCode.COMMAND_INJECTION in result.reasoning
 
 def test_decision_quarantine_untrusted_anomaly(decision_engine):
-    detection = DetectionResult(is_malicious=False, risk_score=0.2, threats=[])
-    behavior = BehaviorAnalysis(deviation_level=DeviationLevel.CRITICAL, details=["Massive deviation"], confidence=0.9)
-    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.2, successful_requests=2)
+    detection = DetectionResult(is_malicious=False, risk_score=0.2, threat_count=0, threats=[])
+    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.05, status=TrustStatus.QUARANTINED, successful_requests=2)
     
-    result = decision_engine.evaluate(detection, behavior, trust)
+    result = decision_engine.decide(detection_result=detection, trust_profile=trust)
     
-    assert result.decision.name == "QUARANTINE"
-    assert "CRITICAL_ANOMALY" in [r.code for r in result.reasons]
-    assert "LOW_TRUST" in [r.code for r in result.reasons]
+    assert result.decision == Decision.QUARANTINE
+    assert ReasonCode.QUARANTINED_AGENT in result.reasoning
+    assert ReasonCode.CRITICAL_TRUST in result.reasoning
 
 def test_decision_interceptor_context(decision_engine):
-    detection = DetectionResult(is_malicious=False, risk_score=0.0, threats=[])
-    behavior = BehaviorAnalysis(deviation_level=DeviationLevel.NORMAL, details=[], confidence=1.0)
-    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, successful_requests=10)
+    detection = DetectionResult(is_malicious=False, risk_score=0.0, threat_count=0, threats=[])
+    trust = AgentTrustProfile(agent_id="agent-1", trust_score=0.9, status=TrustStatus.TRUSTED, successful_requests=10)
     
     context = {
         "auth_matrix_authorized": False
     }
-    result = decision_engine.evaluate(detection, behavior, trust, context)
+    result = decision_engine.decide(detection_result=detection, trust_profile=trust, context=context)
     
-    assert result.decision.name == "BLOCK"
-    assert "UNAUTHORIZED_TOOL" in [r.code for r in result.reasons]
+    assert result.decision == Decision.BLOCK
+    assert ReasonCode.UNAUTHORIZED_TOOL in result.reasoning
