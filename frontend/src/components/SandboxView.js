@@ -529,8 +529,14 @@ export default function SandboxView({ onNavigateToSession }) {
                     </span>
                   </div>
                   <h2 className="text-base font-bold flex items-center gap-1.5 mt-1" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>
-                    <ShieldAlert className="w-[18px] h-[18px]" style={{ color: result.detection?.is_malicious ? '#ef4444' : '#22c55e' }} strokeWidth={1.5} />
-                    {result.detection?.is_malicious ? 'MALICIOUS TRANSACTION TRIGGERED' : 'BENIGN USER QUERY'}
+                    {(() => {
+                      const codes = result.decision?.reason_codes || [];
+                      const isUnknownAgent = codes.includes('UNKNOWN_AGENT');
+                      if (isUnknownAgent) {
+                        return <><Shield className="w-[18px] h-[18px] text-amber-400" strokeWidth={1.5} />ZERO-TRUST ONBOARDING BLOCK</>;
+                      }
+                      return <><ShieldAlert className="w-[18px] h-[18px]" style={{ color: result.detection?.is_malicious ? '#ef4444' : '#22c55e' }} strokeWidth={1.5} />{result.detection?.is_malicious ? 'MALICIOUS TRANSACTION TRIGGERED' : 'BENIGN USER QUERY'}</>;
+                    })()}
                   </h2>
                 </div>
                 <div className="text-right">
@@ -546,12 +552,33 @@ export default function SandboxView({ onNavigateToSession }) {
               {/* Grid 1: Executive Summary */}
               <div className="border p-4 rounded-xl space-y-2" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
                 <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Executive Summary</span>
-                <p className="text-xs leading-relaxed" style={{ color: 'rgba(254,250,224,0.75)' }}>
-                  A transaction request from agent <code className="font-mono text-sky-400 font-bold">{result.agent_id}</code> was intercepted and evaluated at <code className="font-mono">{new Date(result.timestamp).toLocaleString()}</code>. 
-                  The analysis completed in <code className="font-mono text-emerald-400 font-bold">{analysisDuration} ms</code>. 
-                  Exploit analysis returned a cumulative risk index of <code className="font-mono">{result.decision?.risk_score.toFixed(3)}</code>. 
-                  Automated security actions resolved to <code className="font-mono uppercase font-bold">{result.decision?.decision}</code> based on reputational grade <code className="font-mono">{result.trust?.security_grade}</code>.
-                </p>
+                {(() => {
+                  const codes = result.decision?.reason_codes || [];
+                  const isUnknownAgent = codes.includes('UNKNOWN_AGENT');
+                  if (isUnknownAgent) {
+                    return (
+                      <div className="space-y-2">
+                        <p className="text-xs leading-relaxed" style={{ color: 'rgba(254,250,224,0.75)' }}>
+                          Agent <code className="font-mono text-amber-400 font-bold">{result.agent_id}</code> attempted to interact at <code className="font-mono">{new Date(result.timestamp).toLocaleString()}</code>,
+                          but is <span className="text-amber-400 font-bold">not registered</span> in the AgentShield trust registry.
+                          Under Zero-Trust policy, all unrecognized agents are blocked on first contact regardless of prompt content.
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: 'rgba(254,250,224,0.5)' }}>
+                          This block is <span className="font-bold" style={{ color: '#22c55e' }}>not caused by a malicious prompt</span>. The content was not evaluated for threat signatures.
+                          To allow this agent, it must be onboarded and assigned a trust profile.
+                        </p>
+                      </div>
+                    );
+                  }
+                  return (
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(254,250,224,0.75)' }}>
+                      A transaction request from agent <code className="font-mono text-sky-400 font-bold">{result.agent_id}</code> was intercepted and evaluated at <code className="font-mono">{new Date(result.timestamp).toLocaleString()}</code>.
+                      The analysis completed in <code className="font-mono text-emerald-400 font-bold">{analysisDuration} ms</code>.
+                      Exploit analysis returned a cumulative risk index of <code className="font-mono">{result.decision?.risk_score.toFixed(3)}</code>.
+                      Automated security actions resolved to <code className="font-mono uppercase font-bold">{result.decision?.decision}</code> based on reputational grade <code className="font-mono">{result.trust?.security_grade}</code>.
+                    </p>
+                  );
+                })()}
               </div>
 
               {/* Grid 2: Scores & Badges */}
@@ -620,6 +647,36 @@ export default function SandboxView({ onNavigateToSession }) {
                   <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Vulnerability Taxonomy</span>
                   <div className="space-y-3">
                     {(() => {
+                      const codes = result.decision?.reason_codes || [];
+                      const isUnknownAgent = codes.includes('UNKNOWN_AGENT');
+
+                      // Zero-Trust onboarding block — show policy badges, not threat taxonomy
+                      if (isUnknownAgent) {
+                        return (
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-2.5 text-xs">
+                              <Shield className="w-[18px] h-[18px] mt-0.5 text-amber-400 flex-shrink-0" strokeWidth={1.5} />
+                              <div>
+                                <span className="text-[9px] font-bold block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>BLOCK REASON</span>
+                                <span className="inline-flex items-center gap-1.5 mt-1">
+                                  <span className="px-2 py-0.5 text-[9px] font-bold rounded-md border uppercase bg-amber-400/10 text-amber-400 border-amber-400/25" style={{ fontFamily: 'var(--font-display)' }}>Unknown Agent</span>
+                                  <span className="px-2 py-0.5 text-[9px] font-bold rounded-md border uppercase bg-sky-400/10 text-sky-400 border-sky-400/25" style={{ fontFamily: 'var(--font-display)' }}>Zero Trust Policy</span>
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2.5 text-xs border-t border-white/[0.04] pt-2.5">
+                              <Info className="w-[18px] h-[18px] mt-0.5 text-sky-400 flex-shrink-0" strokeWidth={1.5} />
+                              <div>
+                                <span className="text-[9px] font-bold block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>POLICY REFERENCE</span>
+                                <span className="font-medium mt-0.5 block" style={{ color: 'rgba(254,250,224,0.6)' }}>
+                                  Zero-Trust Agent Onboarding — all unregistered agents are denied until explicitly trusted.
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       const threatInfo = getPrimaryThreatInfo(result);
                       if (!threatInfo) {
                         return (
