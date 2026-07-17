@@ -144,7 +144,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
       {/* Left Pane - Incident Feed Log */}
       <div className="w-full lg:w-80 flex flex-col rounded-2xl border overflow-hidden flex-shrink-0" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
         <div className="p-4 border-b border-white/[0.04] space-y-3 bg-white/[0.01]">
-          <span className="text-xs font-mono font-bold uppercase tracking-wider block" style={{ color: '#FEFAE0' }}>Interception Log</span>
+          <span className="text-xs font-bold uppercase tracking-wider block" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Interception Log</span>
           
           <div className="relative">
             <input
@@ -157,7 +157,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                 background: '#0c0c0e',
                 border: '1px solid rgba(254,250,224,0.08)',
                 color: '#FEFAE0',
-                fontFamily: 'monospace'
+                fontFamily: 'var(--font-mono)'
               }}
               onFocus={(e) => { e.currentTarget.style.borderColor = '#4361EE'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,97,238,0.3)'; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(254,250,224,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
@@ -165,7 +165,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
             <Search className="w-4 h-4 absolute left-3 top-2.5" style={{ color: 'rgba(254,250,224,0.35)' }} />
           </div>
 
-          <div className="flex rounded-lg p-0.5 border text-[9px] font-mono" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
+          <div className="flex rounded-lg p-0.5 border text-[9px]" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)', fontFamily: 'var(--font-display)' }}>
             {['ALL', 'COMPLETE', 'FAILED'].map(status => (
               <button
                 key={status}
@@ -186,9 +186,9 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
         {/* List Content */}
         <div className="flex-grow overflow-y-auto divide-y divide-white/[0.04] max-h-[calc(100vh-20rem)] lg:max-h-[none] scrollbar-thin">
           {loadingList ? (
-            <div className="p-8 text-center font-mono text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Loading session logs...</div>
+            <div className="p-8 text-center text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Loading session logs...</div>
           ) : sessions.length === 0 ? (
-            <div className="p-8 text-center font-mono text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>No logs matching filters.</div>
+            <div className="p-8 text-center text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>No logs matching filters.</div>
           ) : (
             sessions.map((s) => (
               <div
@@ -203,17 +203,17 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                   color: sessionId === s.session_id ? '#FEFAE0' : 'rgba(254,250,224,0.6)'
                 }}
               >
-                <div className="flex justify-between items-center mb-1.5 font-mono text-[10px]">
-                  <span className={sessionId === s.session_id ? 'text-[#FEFAE0] font-bold' : 'text-zinc-550'}>
+                <div className="flex justify-between items-center mb-1.5 text-[10px]">
+                  <span className={`font-mono ${sessionId === s.session_id ? 'text-[#FEFAE0] font-bold' : 'text-zinc-550'}`}>
                     {s.session_id.substring(0, 8)}
                   </span>
-                  <span style={{ color: 'rgba(254,250,224,0.35)' }}>
+                  <span className="font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
                     {new Date(s.started_at).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center gap-2">
-                  <span className="font-sans font-medium truncate max-w-[130px]" style={{ color: '#FEFAE0' }}>{s.agent_id}</span>
-                  <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase border ${getVerdictStyle(s.final_decision)}`}>
+                  <span className="font-mono font-medium truncate max-w-[130px]" style={{ color: '#FEFAE0' }}>{s.agent_id}</span>
+                  <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase border ${getVerdictStyle(s.final_decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
                     {s.final_decision || 'PENDING'}
                   </span>
                 </div>
@@ -229,11 +229,11 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
       {/* Right Pane - Timeline Replay */}
       <div className="flex-1 flex flex-col rounded-2xl border overflow-hidden min-h-[500px]" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
         {loadingTimeline ? (
-          <div className="flex-grow flex items-center justify-center font-mono text-xs" style={{ color: 'rgba(254,250,224,0.35)' }}>
+          <div className="flex-grow flex items-center justify-center text-xs" style={{ color: 'rgba(254,250,224,0.35)' }}>
             Querying timeline frames...
           </div>
         ) : !activeSession ? (
-          <div className="flex-grow flex flex-col items-center justify-center p-12 text-center font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
+          <div className="flex-grow flex flex-col items-center justify-center p-12 text-center" style={{ color: 'rgba(254,250,224,0.35)' }}>
             <PlayCircle className="w-8 h-8 mb-3" style={{ color: 'rgba(254,250,224,0.15)' }} />
             <p className="text-[11px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Select an active incident from the interception log to analyze details.</p>
           </div>
@@ -243,30 +243,30 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
             <div className="p-5 border-b border-white/[0.04] bg-white/[0.01] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold" style={{ color: 'rgba(254,250,224,0.35)' }}>Session Audit /</span>
+                  <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Session Audit /</span>
                   <h2 className="text-sm font-bold font-mono" style={{ color: '#FEFAE0' }}>{activeSession.session_id.substring(0, 8)}</h2>
                   <span className={`px-2 py-0.5 text-[9px] font-semibold rounded uppercase ${
                     activeSession.status === 'COMPLETE' ? 'bg-[#2A9D8F]/15 text-[#2A9D8F] border border-[#2A9D8F]/20' : 'bg-[#E07A5F]/15 text-[#E07A5F] border border-[#E07A5F]/20'
-                  }`}>
+                  }`} style={{ fontFamily: 'var(--font-display)' }}>
                     {activeSession.status}
                   </span>
                 </div>
                 <p className="text-[11px] mt-1 font-sans" style={{ color: 'rgba(254,250,224,0.6)' }}>
-                  Target Agent: <span className="font-semibold" style={{ color: '#FEFAE0' }}>{activeSession.agent_id}</span>
+                  Target Agent: <span className="font-semibold font-mono" style={{ color: '#FEFAE0' }}>{activeSession.agent_id}</span>
                   <span className="mx-2" style={{ color: 'rgba(254,250,224,0.15)' }}>•</span>
                   Event ID: <span className="font-mono text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>{activeSession.event_id}</span>
                 </p>
               </div>
-              <div className="text-right text-[10px] font-mono leading-relaxed" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                <p>Telemetry Latency: <span className="font-bold" style={{ color: '#4361EE' }}>{activeSession.duration_ms?.toFixed(3)} ms</span></p>
-                <p className="mt-0.5">Captured: {new Date(activeSession.started_at).toLocaleString()}</p>
+              <div className="text-right text-[10px] leading-relaxed" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                <p>Telemetry Latency: <span className="font-bold font-mono" style={{ color: '#4361EE' }}>{activeSession.duration_ms?.toFixed(3)} ms</span></p>
+                <p className="mt-0.5 font-mono">Captured: {new Date(activeSession.started_at).toLocaleString()}</p>
               </div>
             </div>
 
             {/* Analyst Executive Summary Callout */}
             {activeSession.overall_summary && (
               <div className="mx-6 mt-6 p-4 rounded-xl border flex items-start space-x-3.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
-                <div className="w-5 h-5 rounded flex items-center justify-center font-mono font-bold flex-shrink-0 text-[11px] mt-0.5 border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
+                <div className="w-5 h-5 rounded flex items-center justify-center font-bold flex-shrink-0 text-[11px] mt-0.5 border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>
                   i
                 </div>
                 <div>
@@ -317,17 +317,17 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                           <div className="flex items-center space-x-3.5 flex-shrink-0">
                             {/* Score Telemetry Badges */}
                             {frame.risk_score !== null && (
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
-                                risk: <span className={getRiskColor(frame.risk_score)}>{frame.risk_score.toFixed(3)}</span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
+                                risk: <span className={`font-mono ${getRiskColor(frame.risk_score)}`}>{frame.risk_score.toFixed(3)}</span>
                               </span>
                             )}
                             {frame.trust_score !== null && (
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
-                                trust: <span className="text-[#4CC9F0]">{frame.trust_score.toFixed(3)}</span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
+                                trust: <span className="font-mono text-[#4CC9F0]">{frame.trust_score.toFixed(3)}</span>
                               </span>
                             )}
                             {frame.decision && (
-                              <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-md uppercase border ${getVerdictStyle(frame.decision)}`}>
+                              <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-md uppercase border ${getVerdictStyle(frame.decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
                                 {frame.decision}
                               </span>
                             )}
@@ -340,8 +340,8 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
 
                         {/* Collapsible Details Area */}
                         {isExpanded && (
-                          <div className="p-4 border-t border-white/[0.04] text-xs font-mono space-y-4" style={{ background: '#181D4A' }}>
-                            <div className="flex justify-between text-[10px] pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                          <div className="p-4 border-t border-white/[0.04] text-xs space-y-4" style={{ background: '#181D4A' }}>
+                            <div className="flex justify-between text-[10px] pb-2 border-b border-white/[0.04] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
                               <span>Source Module: {frame.engine}</span>
                               <span>Timestamp: {new Date(frame.timestamp).toLocaleTimeString()}</span>
                             </div>
@@ -349,7 +349,7 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                             {/* Structured metadata layout */}
                             {Object.keys(frame.metadata || {}).length > 0 ? (
                               <div className="space-y-3 font-sans">
-                                <span className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Inspection Metadata</span>
+                                <span className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Inspection Metadata</span>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 border p-3 rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
                                   {Object.entries(frame.metadata).map(([key, val]) => {
                                     if (typeof val === 'object' && val !== null) return null;
@@ -369,23 +369,23 @@ export default function ReplayView({ sessionId, onSelectSessionId }) {
                             {/* Threats list */}
                             {frame.stage === 'DETECTED' && frame.metadata.threats?.length > 0 && (
                               <div className="space-y-2 font-sans pt-1">
-                                <span className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: '#E07A5F' }}>Matched Vulnerability Rules</span>
+                                <span className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: '#E07A5F', fontFamily: 'var(--font-display)' }}>Matched Vulnerability Rules</span>
                                 <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'rgba(254,250,224,0.08)' }}>
                                   <table className="w-full text-left text-[11px] border-collapse">
                                     <thead>
-                                      <tr className="border-b bg-white/[0.01]" style={{ borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.35)' }}>
-                                        <th className="px-3 py-1.5 font-mono text-[9px] uppercase font-medium">Rule Name</th>
-                                        <th className="px-3 py-1.5 font-mono text-[9px] uppercase font-medium">Category</th>
-                                        <th className="px-3 py-1.5 font-mono text-[9px] uppercase font-medium">Severity</th>
+                                      <tr className="border-b bg-white/[0.01]" style={{ borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
+                                        <th className="px-3 py-1.5 text-[9px] uppercase font-medium">Rule Name</th>
+                                        <th className="px-3 py-1.5 text-[9px] uppercase font-medium">Category</th>
+                                        <th className="px-3 py-1.5 text-[9px] uppercase font-medium">Severity</th>
                                       </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/[0.04] font-mono">
+                                    <tbody className="divide-y divide-white/[0.04]">
                                       {frame.metadata.threats.map((threat, idx) => (
                                         <tr key={idx} className="hover:bg-white/[0.01]">
                                           <td className="px-3 py-1.5 font-sans" style={{ color: '#FEFAE0' }}>{threat.name}</td>
                                           <td className="px-3 py-1.5 text-zinc-450">{threat.category}</td>
                                           <td className="px-3 py-1.5">
-                                            <span className="font-semibold" style={{ color: '#E07A5F' }}>{threat.severity}</span>
+                                            <span className="font-semibold font-mono" style={{ color: '#E07A5F' }}>{threat.severity}</span>
                                           </td>
                                         </tr>
                                       ))}

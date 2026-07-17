@@ -171,7 +171,7 @@ export default function App() {
     return (
       <div className="min-h-screen text-foreground flex flex-col items-center justify-center font-sans antialiased" style={{ background: '#03045E' }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin mb-4" style={{ borderColor: 'rgba(254,250,224,0.08)', borderTopColor: '#4361EE' }}></div>
-        <p className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'rgba(254,250,224,0.35)' }}>Validating Security Session...</p>
+        <p className="text-[10px] tracking-widest uppercase" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Validating Security Session...</p>
       </div>
     );
   }
@@ -277,7 +277,7 @@ export default function App() {
                   />
                   <span className="text-[13px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Remember me</span>
                 </label>
-                <button type="button" className="text-[13px] transition-colors hover:underline" style={{ color: '#4361EE' }}>
+                <button type="button" className="text-[13px] transition-colors hover:underline font-display" style={{ color: '#4361EE' }}>
                   Forgot password?
                 </button>
               </div>
@@ -285,7 +285,7 @@ export default function App() {
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full h-12 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                className="w-full h-12 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-4 font-display"
                 style={{
                   background: '#4361EE',
                   color: '#FFFFFF',
@@ -374,7 +374,7 @@ export default function App() {
                   setActiveTab(tab.id);
                   if (tab.id !== 'replay') setSelectedSessionId(null);
                 }}
-                className={`flex items-center gap-3 px-3 w-full h-10 rounded-lg transition-all duration-150 text-[13px] font-medium tracking-wide text-left ${
+                className={`flex items-center gap-3 px-3 w-full h-10 rounded-lg transition-all duration-150 text-[13px] font-medium tracking-wide text-left font-display ${
                   isActive ? 'text-[#4361EE]' : 'hover:text-[#FEFAE0]'
                 }`}
                 style={{
@@ -393,7 +393,7 @@ export default function App() {
         <div className="px-3 pb-4 relative" ref={menuRef}>
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg transition-all duration-150 hover:bg-white/[0.03]"
+            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg transition-all duration-150 hover:bg-white/[0.03] font-display"
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(67, 97, 238, 0.2)', color: '#4361EE' }}>
               {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
@@ -405,7 +405,7 @@ export default function App() {
           </button>
 
           {userMenuOpen && (
-            <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg overflow-hidden z-50" style={{ background: '#111640', border: '1px solid rgba(254,250,224,0.08)', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
+            <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg overflow-hidden z-50 font-display" style={{ background: '#111640', border: '1px solid rgba(254,250,224,0.08)', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
               <button
                 onClick={() => { setActiveTab('settings'); setUserMenuOpen(false); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-xs w-full text-left transition-colors hover:bg-white/[0.03]"
@@ -430,8 +430,8 @@ export default function App() {
         {/* Top Header */}
         <header className="sticky top-0 h-14 flex items-center justify-between px-6 z-30 border-b border-border" style={{ background: 'rgba(3,4,94,0.8)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center space-x-3">
-            <span className="text-xs font-mono font-bold tracking-widest uppercase" style={{ color: 'rgba(254, 250, 224, 0.35)' }}>SYS_TAB /</span>
-            <h2 className="text-sm font-bold tracking-tight" style={{ color: '#FEFAE0' }}>{getTabLabel(activeTab)}</h2>
+            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'rgba(254, 250, 224, 0.35)', fontFamily: 'var(--font-display)' }}>SYS_TAB /</span>
+            <h2 className="text-sm font-bold tracking-tight font-display" style={{ color: '#FEFAE0' }}>{getTabLabel(activeTab)}</h2>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -452,7 +452,7 @@ export default function App() {
             {/* User Profile Info Badge */}
             {currentUser && (
               <div className="flex items-center space-x-3 text-xs border-l border-white/10 pl-4">
-                <span className="font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>{currentUser.email}</span>
+                <span style={{ color: 'rgba(254,250,224,0.6)' }}>{currentUser.email}</span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide uppercase" style={{ background: 'rgba(67, 97, 238, 0.15)', border: '1px solid rgba(67, 97, 238, 0.25)', color: '#4361EE' }}>
                   {currentUser.role}
                 </span>

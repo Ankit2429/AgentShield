@@ -222,7 +222,7 @@ export function GlobeCdn({
             ))}
           </div>
           <span style={{
-            fontFamily: "monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: "0.55rem",
             color: "#FEFAE0",
             background: "#181D4A",
@@ -244,7 +244,7 @@ export function GlobeCdn({
             bottom: "anchor(top)",
             left: "anchor(center)",
             translate: "-50% 0",
-            fontFamily: "monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: "0.5rem",
             color: "#FEFAE0",
             background: "#181D4A",

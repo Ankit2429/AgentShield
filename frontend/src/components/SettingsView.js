@@ -86,7 +86,7 @@ export default function SettingsView() {
         <div className="flex space-x-3">
           <button
             onClick={resetConfig}
-            className="px-3.5 py-2 text-xs font-medium rounded-lg transition-all duration-150 hover:bg-white/[0.03] flex items-center gap-1.5"
+            className="px-3.5 py-2 text-xs font-medium rounded-lg transition-all duration-150 hover:bg-white/[0.03] flex items-center gap-1.5 font-display"
             style={{
               background: 'transparent',
               border: '1px solid rgba(254,250,224,0.08)',
@@ -97,7 +97,7 @@ export default function SettingsView() {
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-150 hover:-translate-y-0.5"
+            className="px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-150 hover:-translate-y-0.5 font-display"
             style={{
               background: '#4361EE',
               color: '#FFFFFF',
@@ -131,7 +131,7 @@ export default function SettingsView() {
               <button
                 key={tab.id}
                 onClick={() => setActiveConfigTab(tab.id)}
-                className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-all duration-150 flex items-center gap-2 ${
+                className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-all duration-150 flex items-center gap-2 font-display ${
                   activeConfigTab === tab.id
                     ? 'text-[#4361EE]'
                     : 'text-rgba(254,250,224,0.6) hover:text-[#FEFAE0]'
@@ -154,7 +154,7 @@ export default function SettingsView() {
           {activeConfigTab === 'detections' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Vulnerability Signature Matching</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider font-display" style={{ color: '#FEFAE0' }}>Vulnerability Signature Matching</h3>
                 <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Toggle active protection rules analyzed during Stage 1: Threat Detection</p>
               </div>
 
@@ -184,12 +184,12 @@ export default function SettingsView() {
               </div>
 
               <div className="pt-4 border-t border-white/[0.04] space-y-2">
-                <label className="text-[10px] uppercase font-mono font-bold tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Detection Sensitivity</label>
+                <label className="text-[10px] uppercase font-bold tracking-wider block font-display" style={{ color: 'rgba(254,250,224,0.35)' }}>Detection Sensitivity</label>
                 <div className="relative max-w-xs w-full">
                   <select
                     value={config.detectionSensitivity}
                     onChange={(e) => setConfig({ ...config, detectionSensitivity: e.target.value })}
-                    className="w-full pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono"
+                    className="w-full pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-sans"
                     style={{
                       background: '#0c0c0e',
                       border: '1px solid rgba(254,250,224,0.08)',
@@ -210,7 +210,7 @@ export default function SettingsView() {
           {activeConfigTab === 'dna' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Behavioral DNA Engine Configuration</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider font-display" style={{ color: '#FEFAE0' }}>Behavioral DNA Engine Configuration</h3>
                 <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Adjust Stage 2 baselines for identifying statistical anomalies in fleet communication</p>
               </div>
 
@@ -243,7 +243,7 @@ export default function SettingsView() {
                     <label className="text-xs font-bold block" style={{ color: '#FEFAE0' }}>Behavioral Deviation Drift Sensitivity</label>
                     <span className="text-xs font-mono font-bold" style={{ color: '#4CC9F0' }}>{(config.driftSensitivity * 100).toFixed(0)}%</span>
                   </div>
-                  <p className="text-[10px] leading-normal mb-3" style={{ color: 'rgba(254,250,224,0.6)' }}>
+                  <p className="text-[10px] leading-normal mb-3" style={{ color: 'rgba(254, 250, 224, 0.6)' }}>
                     Threshold for signaling drift. Lower values detect finer behavioral changes (e.g. stylistic variations) at the risk of higher false alarm rates.
                   </p>
                   <input
@@ -264,7 +264,7 @@ export default function SettingsView() {
           {activeConfigTab === 'actions' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Security Action Matrix</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider font-display" style={{ color: '#FEFAE0' }}>Security Action Matrix</h3>
                 <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Define automated Stage 4 verdict orchestrations based on risk levels</p>
               </div>
 
@@ -272,13 +272,13 @@ export default function SettingsView() {
                 <div className="flex items-center justify-between p-4 rounded-xl border" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
                   <div className="space-y-0.5 pr-4">
                     <span className="text-xs font-bold block" style={{ color: '#FEFAE0' }}>Critical Risk Action</span>
-                    <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Verdict applied when cumulative threat score is &gt;= 0.80</span>
+                    <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Verdict applied when cumulative threat score is <span className="font-mono">&gt;= 0.80</span></span>
                   </div>
                   <div className="relative">
                     <select
                       value={config.criticalDefaultAction}
                       onChange={(e) => setConfig({ ...config, criticalDefaultAction: e.target.value })}
-                      className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono w-32"
+                      className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-sans w-32"
                       style={{
                         background: '#181D4A',
                         border: '1px solid rgba(254,250,224,0.08)',
@@ -296,13 +296,13 @@ export default function SettingsView() {
                 <div className="flex items-center justify-between p-4 rounded-xl border" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
                   <div className="space-y-0.5 pr-4">
                     <span className="text-xs font-bold block" style={{ color: '#FEFAE0' }}>Warning Risk Action</span>
-                    <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Verdict applied when cumulative threat score is 0.40 - 0.80</span>
+                    <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Verdict applied when cumulative threat score is <span className="font-mono">0.40 - 0.80</span></span>
                   </div>
                   <div className="relative">
                     <select
                       value={config.warningDefaultAction}
                       onChange={(e) => setConfig({ ...config, warningDefaultAction: e.target.value })}
-                      className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono w-36"
+                      className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-sans w-36"
                       style={{
                         background: '#181D4A',
                         border: '1px solid rgba(254,250,224,0.08)',
@@ -324,7 +324,7 @@ export default function SettingsView() {
           {activeConfigTab === 'integrations' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Integrations & API</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider font-display" style={{ color: '#FEFAE0' }}>Integrations & API</h3>
                 <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Export security verdicts to webhook endpoints and syslog receivers</p>
               </div>
 
@@ -335,7 +335,7 @@ export default function SettingsView() {
                     type="url"
                     value={config.webhookUrl}
                     onChange={(e) => setConfig({ ...config, webhookUrl: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg outline-none border transition-all font-mono"
+                    className="w-full px-3 py-2 text-xs rounded-lg outline-none border transition-all font-sans"
                     style={{
                       background: '#181D4A',
                       border: '1px solid rgba(254,250,224,0.08)',
@@ -389,7 +389,7 @@ export default function SettingsView() {
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="px-3.5 py-2 rounded-lg transition-all duration-150 hover:bg-white/[0.03] text-xs font-medium"
+                      className="px-3.5 py-2 rounded-lg transition-all duration-150 hover:bg-white/[0.03] text-xs font-medium font-display"
                       style={{
                         background: 'transparent',
                         border: '1px solid rgba(254,250,224,0.08)',

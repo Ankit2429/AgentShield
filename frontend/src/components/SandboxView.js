@@ -317,7 +317,7 @@ export default function SandboxView({ onNavigateToSession }) {
           
           {/* Predefined Attack Library */}
           <div className="card-surface p-4 flex flex-col border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>
+            <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
               SOC Attack Signature Library
             </span>
             <div className="grid grid-cols-1 gap-2.5 mt-3 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin">
@@ -347,13 +347,13 @@ export default function SandboxView({ onNavigateToSession }) {
           {/* Form Editor */}
           <div className="card-surface p-4 flex flex-col border flex-grow justify-between gap-5" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
             <div className="space-y-4">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>
+              <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
                 Payload Construction Editor
               </span>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>Agent ID</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>Agent ID</label>
                   <input
                     type="text"
                     required
@@ -364,12 +364,12 @@ export default function SandboxView({ onNavigateToSession }) {
                       background: '#0c0c0e',
                       border: '1px solid rgba(254,250,224,0.08)',
                       color: '#FEFAE0',
-                      fontFamily: 'monospace'
+                      fontFamily: 'var(--font-mono)'
                     }}
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>Capability Target</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>Capability Target</label>
                   <input
                     type="text"
                     placeholder="e.g. shell_exec"
@@ -380,14 +380,14 @@ export default function SandboxView({ onNavigateToSession }) {
                       background: '#0c0c0e',
                       border: '1px solid rgba(254,250,224,0.08)',
                       color: '#FEFAE0',
-                      fontFamily: 'monospace'
+                      fontFamily: 'var(--font-mono)'
                     }}
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>AI Input Message Payload</label>
+                <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>AI Input Message Payload</label>
                 <textarea
                   required
                   rows="6"
@@ -398,7 +398,7 @@ export default function SandboxView({ onNavigateToSession }) {
                     background: '#0c0c0e',
                     border: '1px solid rgba(254,250,224,0.08)',
                     color: '#FEFAE0',
-                    fontFamily: 'monospace'
+                    fontFamily: 'var(--font-mono)'
                   }}
                 ></textarea>
               </div>
@@ -412,6 +412,7 @@ export default function SandboxView({ onNavigateToSession }) {
                 background: '#4361EE',
                 color: '#FFFFFF',
                 boxShadow: '0 4px 12px rgba(67,97,238,0.3)',
+                fontFamily: 'var(--font-display)'
               }}
             >
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -430,8 +431,8 @@ export default function SandboxView({ onNavigateToSession }) {
                 <div className="inline-block relative">
                   <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(254,250,224,0.08)', borderTopColor: '#4361EE' }}></div>
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-widest" style={{ color: '#FEFAE0' }}>Gateway Pipeline Triage</h3>
-                <p className="text-[10px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>Intercepting AI request frame sequentially...</p>
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Gateway Pipeline Triage</h3>
+                <p className="text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Intercepting AI request frame sequentially...</p>
               </div>
 
               {/* Progress Steps */}
@@ -448,8 +449,9 @@ export default function SandboxView({ onNavigateToSession }) {
                         borderColor: isCompleted ? '#2A9D8F' : isActive ? '#4361EE' : 'rgba(254,250,224,0.15)'
                       }}></div>
                       <div className="space-y-0.5">
-                        <span className="font-mono font-bold block" style={{
-                          color: isCompleted ? '#FEFAE0' : isActive ? '#4361EE' : 'rgba(254,250,224,0.35)'
+                        <span className="font-bold block" style={{
+                          color: isCompleted ? '#FEFAE0' : isActive ? '#4361EE' : 'rgba(254,250,224,0.35)',
+                          fontFamily: 'var(--font-display)'
                         }}>
                           {step.label}
                         </span>
@@ -462,9 +464,9 @@ export default function SandboxView({ onNavigateToSession }) {
             </div>
           ) : !result ? (
             /* Empty State */
-            <div className="flex-grow flex flex-col items-center justify-center text-center font-mono py-12" style={{ color: 'rgba(254,250,224,0.35)' }}>
+            <div className="flex-grow flex flex-col items-center justify-center text-center py-12" style={{ color: 'rgba(254,250,224,0.35)' }}>
               <Terminal className="w-12 h-12 mb-3 opacity-20" />
-              <h3 className="text-sm font-semibold" style={{ color: '#FEFAE0' }}>Awaiting Simulation Payload</h3>
+              <h3 className="text-sm font-semibold" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Awaiting Simulation Payload</h3>
               <p className="text-[11px] max-w-[320px] leading-relaxed mt-2" style={{ color: 'rgba(254,250,224,0.6)' }}>
                 Select an attack signature from the library or input a custom prompt, then deploy to generate audit telemetry.
               </p>
@@ -477,29 +479,29 @@ export default function SandboxView({ onNavigateToSession }) {
               <div className="flex justify-between items-start border-b border-white/[0.04] pb-4">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <span className="text-[9px] font-mono uppercase font-bold text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded-md">INCIDENT REPORT</span>
-                    <span className="text-[10px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                      ID: <span className="text-[#FEFAE0] font-bold">{result.event_id}</span>
+                    <span className="text-[9px] uppercase font-bold text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded-md" style={{ fontFamily: 'var(--font-display)' }}>INCIDENT REPORT</span>
+                    <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                      ID: <span className="text-[#FEFAE0] font-bold font-mono">{result.event_id}</span>
                     </span>
                   </div>
-                  <h2 className="text-base font-bold flex items-center gap-1.5 mt-1" style={{ color: '#FEFAE0' }}>
+                  <h2 className="text-base font-bold flex items-center gap-1.5 mt-1" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>
                     <ShieldAlert className="w-4 h-4 text-[#E07A5F]" />
                     {result.detection?.is_malicious ? 'MALICIOUS TRANSACTION TRIGGERED' : 'BENIGN USER QUERY'}
                   </h2>
                 </div>
                 <div className="text-right">
-                  <span className={`px-2.5 py-1 text-xs font-bold font-mono rounded-lg uppercase border ${getVerdictBadge(result.decision?.decision)}`}>
+                  <span className={`px-2.5 py-1 text-xs font-bold rounded-lg uppercase border ${getVerdictBadge(result.decision?.decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
                     {result.decision?.decision}
                   </span>
-                  <span className="text-[9px] font-mono block mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                    Confidence: {(result.decision?.confidence * 100).toFixed(0)}%
+                  <span className="text-[9px] block mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                    Confidence: <span className="font-mono">{(result.decision?.confidence * 100).toFixed(0)}%</span>
                   </span>
                 </div>
               </div>
 
               {/* Grid 1: Executive Summary */}
               <div className="border p-4 rounded-xl space-y-2" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Executive Summary</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Executive Summary</span>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(254,250,224,0.75)' }}>
                   A transaction request from agent <code className="font-mono text-sky-400 font-bold">{result.agent_id}</code> was intercepted and evaluated at <code className="font-mono">{new Date(result.timestamp).toLocaleString()}</code>. 
                   The analysis completed in <code className="font-mono text-emerald-400 font-bold">{analysisDuration} ms</code>. 
@@ -511,36 +513,36 @@ export default function SandboxView({ onNavigateToSession }) {
               {/* Grid 2: Scores & Badges */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="border p-3.5 rounded-xl flex flex-col justify-between" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>Risk Score</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Risk Score</span>
                   <div className="mt-2.5 flex items-baseline justify-between">
                     <span className={`text-xl font-bold font-mono ${getRiskColor(result.detection?.risk_score)}`}>
                       <AnimatedScore targetValue={result.detection?.risk_score} />
                     </span>
-                    <span className="text-[8px] font-mono uppercase bg-[#E07A5F]/15 text-[#E07A5F] px-1 rounded-md border border-[#E07A5F]/20">
+                    <span className="text-[8px] uppercase bg-[#E07A5F]/15 text-[#E07A5F] px-1 rounded-md border border-[#E07A5F]/20" style={{ fontFamily: 'var(--font-display)' }}>
                       {result.detection?.risk_score >= 0.8 ? 'Crit' : result.detection?.risk_score >= 0.4 ? 'Med' : 'Low'}
                     </span>
                   </div>
                 </div>
 
                 <div className="border p-3.5 rounded-xl flex flex-col justify-between" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>Trust Score</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Trust Score</span>
                   <div className="mt-2.5 flex items-baseline justify-between">
                     <span className="text-xl font-bold font-mono text-sky-400">
                       <AnimatedScore targetValue={result.trust?.trust_score} isPercentage={true} />
                     </span>
-                    <span className="text-[8px] font-mono text-[#2A9D8F] font-bold uppercase bg-[#2A9D8F]/15 px-1 rounded-md border border-[#2A9D8F]/20">
+                    <span className="text-[8px] text-[#2A9D8F] font-bold uppercase bg-[#2A9D8F]/15 px-1 rounded-md border border-[#2A9D8F]/20" style={{ fontFamily: 'var(--font-display)' }}>
                       {result.trust?.security_grade}
                     </span>
                   </div>
                 </div>
 
                 <div className="border p-3.5 rounded-xl flex flex-col justify-between" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>Risk Severity</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Risk Severity</span>
                   <div className="mt-2.5 flex items-baseline justify-between">
-                    <span className={`text-sm font-mono font-bold uppercase ${getSeverityBadge(result.decision?.severity)}`}>
+                    <span className={`text-sm font-bold uppercase ${getSeverityBadge(result.decision?.severity)}`} style={{ fontFamily: 'var(--font-display)' }}>
                       {result.decision?.severity}
                     </span>
-                    <span className="text-[8px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>Enforced</span>
+                    <span className="text-[8px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Enforced</span>
                   </div>
                 </div>
               </div>
@@ -549,7 +551,7 @@ export default function SandboxView({ onNavigateToSession }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Detected Techniques / Matched Rules */}
                 <div className="border p-4 rounded-xl space-y-3" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Detected Techniques & Matches</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Detected Techniques & Matches</span>
                   {result.detection?.threats.length > 0 ? (
                     <div className="space-y-2 max-h-[140px] overflow-y-auto scrollbar-thin">
                       {result.detection.threats.map((threat, idx) => (
@@ -558,7 +560,7 @@ export default function SandboxView({ onNavigateToSession }) {
                             <span className="font-semibold block truncate" style={{ color: '#FEFAE0' }}>{threat.name}</span>
                             <span className="text-[9px] block text-zinc-550 truncate">Category: {threat.category}</span>
                           </div>
-                          <span className={`px-1.5 py-0.5 text-[8px] font-mono rounded border uppercase ${getSeverityBadge(threat.severity)}`}>
+                          <span className={`px-1.5 py-0.5 text-[8px] rounded border uppercase ${getSeverityBadge(threat.severity)}`} style={{ fontFamily: 'var(--font-display)' }}>
                             {threat.severity}
                           </span>
                         </div>
@@ -571,7 +573,7 @@ export default function SandboxView({ onNavigateToSession }) {
 
                 {/* Taxonomy mappings */}
                 <div className="border p-4 rounded-xl space-y-3.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Vulnerability Taxonomy</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Vulnerability Taxonomy</span>
                   <div className="space-y-3">
                     {/* OWASP */}
                     {(() => {
@@ -581,7 +583,7 @@ export default function SandboxView({ onNavigateToSession }) {
                         <div className="flex items-start gap-2.5 text-xs">
                           <BookOpen className="w-4 h-4 mt-0.5 text-amber-400 flex-shrink-0" />
                           <div>
-                            <span className="text-[9px] font-mono font-bold block" style={{ color: 'rgba(254,250,224,0.35)' }}>OWASP LLM TOP 10</span>
+                            <span className="text-[9px] font-bold block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>OWASP LLM TOP 10</span>
                             <a
                               href={owasp.link}
                               target="_blank"
@@ -604,9 +606,9 @@ export default function SandboxView({ onNavigateToSession }) {
                         <div className="flex items-start gap-2.5 text-xs">
                           <ShieldAlert className="w-4 h-4 mt-0.5 text-[#E07A5F] flex-shrink-0" />
                           <div>
-                            <span className="text-[9px] font-mono font-bold block" style={{ color: 'rgba(254,250,224,0.35)' }}>MITRE ATT&CK MATRIX</span>
-                            <span className="font-medium mt-0.5 block" style={{ color: '#E07A5F' }}>
-                              {mitre.id}: {mitre.name}
+                            <span className="text-[9px] font-bold block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>MITRE ATT&CK MATRIX</span>
+                            <span className="font-medium mt-0.5 block font-mono" style={{ color: '#E07A5F' }}>
+                              {mitre.id}: <span className="font-sans">{mitre.name}</span>
                             </span>
                           </div>
                         </div>
@@ -618,16 +620,16 @@ export default function SandboxView({ onNavigateToSession }) {
 
               {/* Grid 4: Behavioral DNA Assessment */}
               <div className="border p-4 rounded-xl space-y-2.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Behavioral DNA Assessment</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Behavioral DNA Assessment</span>
                 {result.behavior ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div className="space-y-1">
                       <span className="text-[9px] text-zinc-550 block">Deviation Coefficient</span>
-                      <span className="font-bold text-[#FEFAE0]">{(result.behavior.behavior_deviation * 100).toFixed(1)}% Drift</span>
+                      <span className="font-bold text-[#FEFAE0] font-mono">{(result.behavior.behavior_deviation * 100).toFixed(1)}% Drift</span>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[9px] text-zinc-550 block">Deviation Status</span>
-                      <span className={`font-bold uppercase ${result.behavior.deviation_level === 'NORMAL' ? 'text-[#2A9D8F]' : 'text-[#F4A261]'}`}>
+                      <span className={`font-bold uppercase font-mono ${result.behavior.deviation_level === 'NORMAL' ? 'text-[#2A9D8F]' : 'text-[#F4A261]'}`}>
                         {result.behavior.deviation_level}
                       </span>
                     </div>
@@ -642,7 +644,7 @@ export default function SandboxView({ onNavigateToSession }) {
 
               {/* Grid 5: Why was this detected? (Explanation Panel) */}
               <div className="border p-4 rounded-xl space-y-2" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Why was this detected?</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Why was this detected?</span>
                 <p className="text-xs leading-relaxed font-sans" style={{ color: 'rgba(254,250,224,0.75)' }}>
                   {result.decision?.explanation || 'No malicious intent detected. Prompt parameters comply with general safety and behavioral baselines.'}
                 </p>
@@ -650,7 +652,7 @@ export default function SandboxView({ onNavigateToSession }) {
 
               {/* Grid 6: Actions & Mitigation Recommendations */}
               <div className="border p-4 rounded-xl space-y-2.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Automated Remediation & Playbook</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Automated Remediation & Playbook</span>
                 <p className="text-xs font-semibold leading-relaxed" style={{ color: result.detection?.is_malicious ? '#E07A5F' : '#2A9D8F' }}>
                   {result.decision?.recommendation || 'No threats detected. Transaction authorized.'}
                 </p>
@@ -665,39 +667,39 @@ export default function SandboxView({ onNavigateToSession }) {
 
               {/* Stage-by-Stage completed timeline */}
               <div className="border p-4 rounded-xl space-y-3" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.06)' }}>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Incident Investigation Timeline</span>
-                <div className="relative pl-4 space-y-3 border-l border-white/[0.08] text-[11px] font-mono">
+                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Incident Investigation Timeline</span>
+                <div className="relative pl-4 space-y-3 border-l border-white/[0.08] text-[11px]">
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#2A9D8F]" />
-                    <span className="font-bold text-[#FEFAE0]">Payload Intercepted</span>
-                    <span className="text-zinc-550 block text-[9px] mt-0.5">Parsed headers and decoded parameters at +0 ms</span>
+                    <span className="font-bold text-[#FEFAE0]" style={{ fontFamily: 'var(--font-display)' }}>Payload Intercepted</span>
+                    <span className="text-zinc-550 block text-[9px] mt-0.5">Parsed headers and decoded parameters at <span className="font-mono">+0 ms</span></span>
                   </div>
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#2A9D8F]" />
-                    <span className="font-bold text-[#FEFAE0]">Signature Match Analysis</span>
+                    <span className="font-bold text-[#FEFAE0]" style={{ fontFamily: 'var(--font-display)' }}>Signature Match Analysis</span>
                     <span className="text-zinc-550 block text-[9px] mt-0.5">
-                      Matched {result.detection?.threat_count || 0} signature profiles at +300 ms
+                      Matched <span className="font-mono">{result.detection?.threat_count || 0}</span> signature profiles at <span className="font-mono">+300 ms</span>
                     </span>
                   </div>
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#2A9D8F]" />
-                    <span className="font-bold text-[#FEFAE0]">Behavioral DNA Check</span>
+                    <span className="font-bold text-[#FEFAE0]" style={{ fontFamily: 'var(--font-display)' }}>Behavioral DNA Check</span>
                     <span className="text-zinc-550 block text-[9px] mt-0.5">
-                      Calculated {(result.behavior?.behavior_deviation * 100 || 0).toFixed(0)}% deviation ratio at +600 ms
+                      Calculated <span className="font-mono">{(result.behavior?.behavior_deviation * 100 || 0).toFixed(0)}%</span> deviation ratio at <span className="font-mono">+600 ms</span>
                     </span>
                   </div>
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#2A9D8F]" />
-                    <span className="font-bold text-[#FEFAE0]">Trust Profile Resolution</span>
+                    <span className="font-bold text-[#FEFAE0]" style={{ fontFamily: 'var(--font-display)' }}>Trust Profile Resolution</span>
                     <span className="text-zinc-550 block text-[9px] mt-0.5">
-                      Reputation resolved to {result.trust?.status} ({result.trust?.security_grade}) at +900 ms
+                      Reputation resolved to <span className="font-mono">{result.trust?.status}</span> (<span className="font-mono">{result.trust?.security_grade}</span>) at <span className="font-mono">+900 ms</span>
                     </span>
                   </div>
                   <div className="relative">
                     <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#2A9D8F]" />
-                    <span className="font-bold text-[#FEFAE0]">Decision Enforcement</span>
+                    <span className="font-bold text-[#FEFAE0]" style={{ fontFamily: 'var(--font-display)' }}>Decision Enforcement</span>
                     <span className="text-zinc-550 block text-[9px] mt-0.5">
-                      Enforced {result.decision?.decision} action with {(result.decision?.confidence * 100 || 0).toFixed(0)}% confidence at +1200 ms
+                      Enforced <span className="font-mono">{result.decision?.decision}</span> action with <span className="font-mono">{(result.decision?.confidence * 100 || 0).toFixed(0)}%</span> confidence at <span className="font-mono">+1200 ms</span>
                     </span>
                   </div>
                 </div>

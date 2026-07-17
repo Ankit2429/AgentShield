@@ -133,12 +133,12 @@ export default function ThreatsView({ onNavigateToSession }) {
           { label: 'Peak Fleet Risk', value: highestRisk.toFixed(3), desc: 'Max interception threat', color: '#2A9D8F' }
         ].map((item, idx) => (
           <div key={idx} className="card-surface p-5 card-surface-hover flex flex-col justify-between">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.label}</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>{item.label}</span>
             <div className="mt-4 flex items-baseline justify-between">
-              <span className={`text-2xl font-semibold tracking-tight ${item.highlight ? 'text-[#E07A5F]' : ''}`} style={{ color: !item.highlight ? '#FEFAE0' : undefined, fontWeight: 600 }}>
+              <span className={`text-2xl font-bold font-mono tracking-tight ${item.highlight ? 'text-[#E07A5F]' : ''}`} style={{ color: !item.highlight ? '#FEFAE0' : undefined }}>
                 {loading ? '...' : item.value}
               </span>
-              <span className="text-[9px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.desc}</span>
+              <span className="text-[9px]" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.desc}</span>
             </div>
           </div>
         ))}
@@ -170,7 +170,7 @@ export default function ThreatsView({ onNavigateToSession }) {
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value)}
-              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono"
+              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-sans"
               style={{
                 background: '#0c0c0e',
                 border: '1px solid rgba(254,250,224,0.08)',
@@ -190,7 +190,7 @@ export default function ThreatsView({ onNavigateToSession }) {
             <select
               value={verdictFilter}
               onChange={(e) => setVerdictFilter(e.target.value)}
-              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-mono"
+              className="pl-3 pr-8 py-2 text-xs rounded-lg outline-none border appearance-none transition-all cursor-pointer font-sans"
               style={{
                 background: '#0c0c0e',
                 border: '1px solid rgba(254,250,224,0.08)',
@@ -212,17 +212,17 @@ export default function ThreatsView({ onNavigateToSession }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-border bg-white/[0.01]" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Threat ID</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Agent ID</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Severity</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Peak Risk</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Enforcement</th>
-                <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Intercepted At</th>
-                <th className="px-5 py-3 text-right font-mono text-[10px] uppercase font-medium">Action</th>
+              <tr className="border-b border-border bg-white/[0.01]" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Threat ID</th>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Agent ID</th>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Severity</th>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Peak Risk</th>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Enforcement</th>
+                <th className="px-5 py-3 text-[10px] uppercase font-medium">Intercepted At</th>
+                <th className="px-5 py-3 text-right font-medium">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] font-mono text-[11px]">
+            <tbody className="divide-y divide-white/[0.04] text-[11px]">
               {loading ? (
                 <tr>
                   <td colSpan="7" className="px-5 py-12 text-center" style={{ color: 'rgba(254,250,224,0.35)' }}>
@@ -244,30 +244,30 @@ export default function ThreatsView({ onNavigateToSession }) {
                       onClick={() => onNavigateToSession(session.session_id)}
                       className="hover:bg-white/[0.02] transition cursor-pointer group"
                     >
-                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.6)' }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>
                         {session.session_id.substring(0, 8)}
                       </td>
-                      <td className="px-5 py-3 font-sans font-medium" style={{ color: '#FEFAE0' }}>
+                      <td className="px-5 py-3 font-mono font-medium" style={{ color: '#FEFAE0' }}>
                         {session.agent_id}
                       </td>
-                      <td className="px-5 py-3">
-                        <span className={`px-2.5 py-0.5 text-[9px] font-bold rounded-md uppercase ${severity.color}`}>
+                      <td className="px-5 py-3 font-sans">
+                        <span className={`px-2.5 py-0.5 text-[9px] font-bold rounded-md uppercase ${severity.color}`} style={{ fontFamily: 'var(--font-display)' }}>
                           {severity.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3" style={{ color: '#FEFAE0' }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: '#FEFAE0' }}>
                         {session.peak_risk_score !== null ? session.peak_risk_score.toFixed(3) : '0.000'}
                       </td>
                       <td className="px-5 py-3 font-sans">
-                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-md uppercase ${getVerdictStyle(session.final_decision)}`}>
+                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-md uppercase ${getVerdictStyle(session.final_decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
                           {session.final_decision || 'PENDING'}
                         </span>
                       </td>
-                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
                         {new Date(session.started_at).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-right">
-                        <span className="text-[10px] group-hover:text-[#4361EE] border border-transparent group-hover:border-[#4361EE]/20 group-hover:bg-[#4361EE]/5 px-2 py-0.5 rounded transition" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                      <td className="px-5 py-3 text-right font-sans">
+                        <span className="text-[10px] group-hover:text-[#4361EE] border border-transparent group-hover:border-[#4361EE]/20 group-hover:bg-[#4361EE]/5 px-2 py-0.5 rounded transition" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
                           Triage Incident &rarr;
                         </span>
                       </td>

@@ -266,16 +266,16 @@ export default function DashboardView({ onNavigateToSession }) {
         ].map((item, idx) => (
           <div key={idx} className="card-surface p-5 card-surface-hover flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>{item.label}</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>{item.label}</span>
               <item.icon className="w-4 h-4" style={{ color: item.color }} />
             </div>
             <div>
-              <span className={`text-2xl font-semibold tracking-tight ${
+              <span className={`text-2xl font-bold tracking-tight font-mono ${
                 item.alert && stats.total_sessions > 0 && !loading ? 'text-[#E07A5F]' : ''
-              }`} style={{ color: !(item.alert && stats.total_sessions > 0 && !loading) ? '#FEFAE0' : undefined, fontWeight: 600 }}>
+              }`} style={{ color: !(item.alert && stats.total_sessions > 0 && !loading) ? '#FEFAE0' : undefined }}>
                 {loading ? '...' : item.value}
               </span>
-              <p className="text-[10px] font-mono mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
+              <p className="text-[10px] mt-1" style={{ color: 'rgba(254,250,224,0.35)' }}>
                 {item.desc}
               </p>
             </div>
@@ -289,7 +289,7 @@ export default function DashboardView({ onNavigateToSession }) {
         <div className="lg:col-span-2 card-surface overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-border flex justify-between items-center bg-white/[0.01]">
             <div>
-              <h2 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Live Operations Feed</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Live Operations Feed</h2>
               <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Most recent AI agent interactions and evaluations</p>
             </div>
             <span className="text-[10px] font-mono border px-2 py-0.5 rounded-lg" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)', color: 'rgba(254,250,224,0.6)' }}>
@@ -300,16 +300,16 @@ export default function DashboardView({ onNavigateToSession }) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-border bg-white/[0.01]" style={{ color: 'rgba(254,250,224,0.35)' }}>
-                  <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Session ID</th>
-                  <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Agent ID</th>
-                  <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Verdict</th>
-                  <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Risk</th>
-                  <th className="px-5 py-3 font-mono text-[10px] uppercase font-medium">Timestamp</th>
-                  <th className="px-5 py-3 text-right font-mono text-[10px] uppercase font-medium">Audit</th>
+                <tr className="border-b border-border bg-white/[0.01]" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
+                  <th className="px-5 py-3 text-[10px] uppercase font-medium">Session ID</th>
+                  <th className="px-5 py-3 text-[10px] uppercase font-medium">Agent ID</th>
+                  <th className="px-5 py-3 text-[10px] uppercase font-medium">Verdict</th>
+                  <th className="px-5 py-3 text-[10px] uppercase font-medium">Risk</th>
+                  <th className="px-5 py-3 text-[10px] uppercase font-medium">Timestamp</th>
+                  <th className="px-5 py-3 text-right font-medium">Audit</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04] font-mono text-[11px]">
+              <tbody className="divide-y divide-white/[0.04] text-[11px]">
                 {stats.recent_decisions.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-5 py-12 text-center italic" style={{ color: 'rgba(254,250,224,0.35)' }}>
@@ -323,27 +323,27 @@ export default function DashboardView({ onNavigateToSession }) {
                       onClick={() => onNavigateToSession(decision.session_id)}
                       className="hover:bg-white/[0.02] transition cursor-pointer group"
                     >
-                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.6)' }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>
                         {decision.session_id.substring(0, 8)}
                       </td>
-                      <td className="px-5 py-3 font-sans font-medium" style={{ color: '#FEFAE0' }}>
+                      <td className="px-5 py-3 font-mono font-medium" style={{ color: '#FEFAE0' }}>
                         {decision.agent_id}
                       </td>
                       <td className="px-5 py-3 font-sans">
-                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded uppercase ${getVerdictStyle(decision.decision)}`}>
+                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded uppercase ${getVerdictStyle(decision.decision)}`} style={{ fontFamily: 'var(--font-display)' }}>
                           {decision.decision}
                         </span>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 font-mono">
                         <span className={getRiskColor(decision.risk_score)}>
                           {decision.risk_score !== null ? decision.risk_score.toFixed(3) : '0.000'}
                         </span>
                       </td>
-                      <td className="px-5 py-3" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>
                         {new Date(decision.started_at).toLocaleTimeString()}
                       </td>
-                      <td className="px-5 py-3 text-right">
-                        <span className="text-[10px] group-hover:text-[#4361EE] border border-transparent group-hover:border-[#4361EE]/20 group-hover:bg-[#4361EE]/5 px-2 py-0.5 rounded transition" style={{ color: 'rgba(254,250,224,0.35)' }}>
+                      <td className="px-5 py-3 text-right font-sans">
+                        <span className="text-[10px] group-hover:text-[#4361EE] border border-transparent group-hover:border-[#4361EE]/20 group-hover:bg-[#4361EE]/5 px-2 py-0.5 rounded transition" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>
                           Inspect &rarr;
                         </span>
                       </td>
@@ -358,7 +358,7 @@ export default function DashboardView({ onNavigateToSession }) {
         {/* Engine Sentinel Stack Panel */}
         <div className="card-surface p-5 space-y-6">
           <div>
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: '#FEFAE0' }}>Engine Sentinel Stack</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Engine Sentinel Stack</h2>
             <p className="text-[10px] mt-0.5" style={{ color: 'rgba(254,250,224,0.35)' }}>Active inspection layer statuses</p>
           </div>
 
@@ -386,14 +386,14 @@ export default function DashboardView({ onNavigateToSession }) {
             ))}
           </div>
 
-          <div className="pt-4 border-t border-white/[0.04] text-[10px] font-mono leading-relaxed space-y-1.5" style={{ color: 'rgba(254,250,224,0.35)' }}>
+          <div className="pt-4 border-t border-white/[0.04] text-[10px] leading-relaxed space-y-1.5" style={{ color: 'rgba(254,250,224,0.35)' }}>
             <div className="flex justify-between">
               <span>Average latency:</span>
-              <span className="font-semibold" style={{ color: 'rgba(254,250,224,0.6)' }}>&lt;1.25ms</span>
+              <span className="font-semibold font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>&lt;1.25ms</span>
             </div>
             <div className="flex justify-between">
               <span>DNA Profiling Baseline:</span>
-              <span style={{ color: 'rgba(254,250,224,0.6)' }}>Min 3 sessions</span>
+              <span className="font-mono" style={{ color: 'rgba(254,250,224,0.6)' }}>Min 3 sessions</span>
             </div>
             <div className="flex justify-between">
               <span>Security Signatures:</span>
@@ -410,8 +410,8 @@ export default function DashboardView({ onNavigateToSession }) {
             
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-white/[0.04] flex justify-between items-center bg-white/[0.01]">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>Gateway Panel /</span>
+              <div className="flex items-center space-x-2" style={{ fontFamily: 'var(--font-display)' }}>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>Gateway Panel /</span>
                 <h2 className="text-sm font-bold" style={{ color: '#FEFAE0' }}>⚡ Attack Simulation Console</h2>
               </div>
               {simStep === 'IDLE' || simStep === 'COMPLETE' ? (
@@ -432,7 +432,7 @@ export default function DashboardView({ onNavigateToSession }) {
               <div className="p-6 space-y-6">
                 {/* Templates Grid */}
                 <div className="space-y-2">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Attack Vector Library</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Attack Vector Library</span>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {Object.entries(templates).map(([key, tpl]) => (
                       <button
@@ -456,7 +456,7 @@ export default function DashboardView({ onNavigateToSession }) {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>Target Agent ID</label>
+                      <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>Target Agent ID</label>
                       <input
                         type="text"
                         required
@@ -474,7 +474,7 @@ export default function DashboardView({ onNavigateToSession }) {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>Requested Capability</label>
+                      <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>Requested Capability</label>
                       <input
                         type="text"
                         placeholder="e.g. file_read, db_query"
@@ -494,7 +494,7 @@ export default function DashboardView({ onNavigateToSession }) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)' }}>Exploit Prompt / AI Message Payload</label>
+                    <label className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.6)', fontFamily: 'var(--font-display)' }}>Exploit Prompt / AI Message Payload</label>
                     <textarea
                       required
                       rows="4"
@@ -516,7 +516,7 @@ export default function DashboardView({ onNavigateToSession }) {
                 {/* Estimated Risk Gauge */}
                 <div className="flex justify-between items-center rounded-lg p-4 border" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
                   <div className="space-y-0.5">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)' }}>Static Risk Profiling</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Static Risk Profiling</span>
                     <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.6)' }}>Estimated threat likelihood prior to execution</span>
                   </div>
                   <span className={`px-2.5 py-0.5 text-[10px] font-bold font-mono rounded-md uppercase ${
@@ -527,7 +527,7 @@ export default function DashboardView({ onNavigateToSession }) {
                 </div>
 
                 {simError && (
-                  <div className="p-3 bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-lg text-[10px] text-[#E07A5F] font-mono">
+                  <div className="p-3 bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-lg text-[10px] text-[#E07A5F]">
                     {simError}
                   </div>
                 )}
@@ -565,8 +565,8 @@ export default function DashboardView({ onNavigateToSession }) {
                   <div className="inline-block relative">
                     <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(254,250,224,0.08)', borderTopColor: '#4361EE' }}></div>
                   </div>
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest" style={{ color: '#FEFAE0' }}>Evaluating Intelligence Engines</h3>
-                  <p className="text-[10px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>Gateway analysis pipeline currently processing payload...</p>
+                  <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Evaluating Intelligence Engines</h3>
+                  <p className="text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Gateway analysis pipeline currently processing payload...</p>
                 </div>
 
                 {/* Vertical Pipeline Steps */}
@@ -594,8 +594,9 @@ export default function DashboardView({ onNavigateToSession }) {
                         }}></div>
 
                         <div className="space-y-0.5">
-                          <span className="font-mono font-bold block" style={{
-                            color: isCompleted ? '#FEFAE0' : isActive ? '#4361EE' : 'rgba(254,250,224,0.35)'
+                          <span className="font-bold block" style={{
+                            color: isCompleted ? '#FEFAE0' : isActive ? '#4361EE' : 'rgba(254,250,224,0.35)',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             {step.label}
                           </span>
@@ -614,7 +615,7 @@ export default function DashboardView({ onNavigateToSession }) {
                   <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto text-xs font-mono font-bold border" style={{ background: '#181D4A', borderColor: '#2A9D8F', color: '#2A9D8F' }}>
                     ✓
                   </div>
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest" style={{ color: '#FEFAE0' }}>Simulation Complete</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#FEFAE0', fontFamily: 'var(--font-display)' }}>Simulation Complete</h3>
                 </div>
                 <IncidentIntelligencePanel 
                   result={simResult} 

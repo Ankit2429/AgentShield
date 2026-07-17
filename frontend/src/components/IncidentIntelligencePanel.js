@@ -65,8 +65,8 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
       {/* 1. What Happened (Concise Executive Summary) */}
       <div className="card-surface p-5 space-y-2" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
         <div className="flex justify-between items-center pb-2 border-b border-white/[0.04]">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)' }}>01 / Executive Summary</span>
-          <span className="text-[9px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>Event ID: {event_id.substring(0, 18)}...</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>01 / Executive Summary</span>
+          <span className="text-[9px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Event ID: <span className="font-mono">{event_id.substring(0, 18)}...</span></span>
         </div>
         <p className="text-xs leading-relaxed pt-1" style={{ color: 'rgba(254,250,224,0.7)' }}>
           At {new Date(timestamp).toLocaleString()}, Agent ID <code className="font-mono text-[11px] px-1 py-0.5 rounded border" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)', color: '#FEFAE0' }}>{agent_id}</code> initiated a transaction {result.requested_tool ? `requesting capability \`${result.requested_tool}\`` : 'with no specified tool call'}. 
@@ -76,19 +76,19 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
       {/* 2. Why was this decision made (Verdict Rationale) */}
       <div className="card-surface p-5 space-y-3" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)' }}>02 / Verdict Rationale</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>02 / Verdict Rationale</span>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
           {/* Detection Evidence */}
           <div className="p-4 rounded-xl border space-y-1.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
-            <span className="text-[9px] font-mono font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)' }}>Detection Evidence</span>
+            <span className="text-[9px] font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Detection Evidence</span>
             {detection.is_malicious ? (
               <div className="space-y-1 text-xs">
                 <span className="font-bold block text-[#E07A5F]">MALICIOUS SIGNATURE MATCH</span>
-                <span className="text-[10px] block font-mono text-zinc-550">Matched Rules ({detection.threat_count}):</span>
+                <span className="text-[10px] block text-zinc-550">Matched Rules (<span className="font-mono">{detection.threat_count}</span>):</span>
                 <ul className="text-[10px] list-disc list-inside space-y-0.5" style={{ color: 'rgba(254,250,224,0.6)' }}>
                   {detection.threats.slice(0, 3).map((t, i) => (
-                    <li key={i} className="truncate" title={t.name}>{t.name} [{t.severity}]</li>
+                    <li key={i} className="truncate" title={t.name}>{t.name} [<span className="font-mono">{t.severity}</span>]</li>
                   ))}
                 </ul>
               </div>
@@ -99,7 +99,7 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
           {/* Behavior Evidence */}
           <div className="p-4 rounded-xl border space-y-1.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
-            <span className="text-[9px] font-mono font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)' }}>Behavioral Evidence</span>
+            <span className="text-[9px] font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Behavioral Evidence</span>
             {behavior ? (
               <div className="space-y-1 text-xs">
                 <span className="font-bold block" style={{ color: behavior.deviation_level === 'HIGH' ? '#F4A261' : '#FEFAE0' }}>
@@ -114,9 +114,9 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
           {/* Trust Evidence */}
           <div className="p-4 rounded-xl border space-y-1.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
-            <span className="text-[9px] font-mono font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)' }}>Reputation Evidence</span>
+            <span className="text-[9px] font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Reputation Evidence</span>
             <div className="space-y-1 text-xs">
-              <span className="font-bold block text-sky-400">Composite Trust Score: {(trust.trust_score * 100).toFixed(1)}%</span>
+              <span className="font-bold block text-sky-400">Composite Trust Score: <span className="font-mono">{(trust.trust_score * 100).toFixed(1)}%</span></span>
               <span className="text-[10px] block" style={{ color: 'rgba(254,250,224,0.6)' }}>
                 Assigned Security Grade: <span className={`font-bold font-mono ${getGradeColor(trust.security_grade)}`}>{trust.security_grade}</span> ({trust.trend} Trend)
               </span>
@@ -125,9 +125,9 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
           {/* Decision Evidence */}
           <div className="p-4 rounded-xl border space-y-1.5" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
-            <span className="text-[9px] font-mono font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)' }}>Enforcement Evidence</span>
+            <span className="text-[9px] font-bold uppercase block" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>Enforcement Evidence</span>
             <div className="space-y-1 text-xs">
-              <span className="font-bold block text-[#FEFAE0]">Verdict: {decision.decision}</span>
+              <span className="font-bold block text-[#FEFAE0]">Verdict: <span className="font-mono">{decision.decision}</span></span>
               <span className="text-[10px] block leading-relaxed" style={{ color: 'rgba(254,250,224,0.6)' }}>{decision.recommendation}</span>
             </div>
           </div>
@@ -136,30 +136,30 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
       {/* 3. What is the impact (Impact Assessment Grid) */}
       <div className="card-surface p-5 space-y-3" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)' }}>03 / Impact Assessment Matrix</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>03 / Impact Assessment Matrix</span>
         
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-1 text-center font-mono">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-1 text-center">
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
             <span className="text-zinc-550 text-[9px] block">Risk Index</span>
-            <span className={`text-sm font-bold block mt-1.5 ${getRiskColor(detection.risk_score)}`}>
+            <span className={`text-sm font-bold block mt-1.5 font-mono ${getRiskColor(detection.risk_score)}`}>
               {detection.risk_score.toFixed(3)}
             </span>
           </div>
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
             <span className="text-zinc-550 text-[9px] block">Confidence</span>
-            <span className="text-sm font-bold block mt-1.5" style={{ color: '#FEFAE0' }}>
+            <span className="text-sm font-bold block mt-1.5 font-mono" style={{ color: '#FEFAE0' }}>
               {(decision.confidence * 100).toFixed(0)}%
             </span>
           </div>
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
             <span className="text-zinc-550 text-[9px] block">Trust Delta</span>
-            <span className="text-sky-400 text-[10px] font-bold block mt-2">
+            <span className="text-sky-400 text-[10px] font-bold block mt-2 font-mono">
               {prevTrust.toFixed(2)} &rarr; {trust.trust_score.toFixed(2)}
             </span>
           </div>
           <div className="p-3 border rounded-lg" style={{ background: '#0c0c0e', borderColor: 'rgba(254,250,224,0.08)' }}>
             <span className="text-zinc-550 text-[9px] block">Behavior Drift</span>
-            <span className={`text-[10px] font-bold block mt-2 ${behavior?.deviation_level === 'HIGH' ? 'text-[#F4A261]' : 'text-zinc-400'}`}>
+            <span className={`text-[10px] font-bold block mt-2 font-mono ${behavior?.deviation_level === 'HIGH' ? 'text-[#F4A261]' : 'text-zinc-400'}`}>
               {behavior ? behavior.deviation_level : 'DNA_N/A'}
             </span>
           </div>
@@ -174,12 +174,12 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
       {/* 4. What should the analyst do next (Mitigation Playbook) */}
       <div className="card-surface p-5 space-y-3" style={{ background: '#181D4A', borderColor: 'rgba(254,250,224,0.08)' }}>
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)' }}>04 / Mitigation Playbook</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider block pb-2 border-b border-white/[0.04]" style={{ color: 'rgba(254,250,224,0.35)', fontFamily: 'var(--font-display)' }}>04 / Mitigation Playbook</span>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-1 text-xs">
           {/* Immediate Actions */}
           <div className="space-y-2.5">
-            <span className="text-[9px] font-mono font-bold uppercase block tracking-wider text-[#E07A5F]">Immediate Actions</span>
+            <span className="text-[9px] font-bold uppercase block tracking-wider text-[#E07A5F]" style={{ fontFamily: 'var(--font-display)' }}>Immediate Actions</span>
             <div className="space-y-2 font-sans" style={{ color: 'rgba(254,250,224,0.6)' }}>
               {decision.decision === 'BLOCK' || decision.decision === 'QUARANTINE' ? (
                 <>
@@ -213,11 +213,11 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
           {/* Investigation Actions */}
           <div className="space-y-2.5">
-            <span className="text-[9px] font-mono font-bold uppercase block tracking-wider text-[#F4A261]">Investigation Actions</span>
+            <span className="text-[9px] font-bold uppercase block tracking-wider text-[#F4A261]" style={{ fontFamily: 'var(--font-display)' }}>Investigation Actions</span>
             <div className="space-y-2 font-sans" style={{ color: 'rgba(254,250,224,0.6)' }}>
               <label className="flex items-start space-x-2 cursor-pointer">
                 <input type="checkbox" className="mt-0.5 rounded cursor-pointer" style={{ accentColor: '#4361EE' }} />
-                <span>Verify Replay Session ID: {session_id.substring(0, 8)}...</span>
+                <span>Verify Replay Session ID: <span className="font-mono">{session_id.substring(0, 8)}...</span></span>
               </label>
               <label className="flex items-start space-x-2 cursor-pointer">
                 <input type="checkbox" className="mt-0.5 rounded cursor-pointer" style={{ accentColor: '#4361EE' }} />
@@ -232,7 +232,7 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
           {/* Monitoring Actions */}
           <div className="space-y-2.5">
-            <span className="text-[9px] font-mono font-bold uppercase block tracking-wider text-[#4361EE]">Monitoring Actions</span>
+            <span className="text-[9px] font-bold uppercase block tracking-wider text-[#4361EE]" style={{ fontFamily: 'var(--font-display)' }}>Monitoring Actions</span>
             <div className="space-y-2 font-sans" style={{ color: 'rgba(254,250,224,0.6)' }}>
               <label className="flex items-start space-x-2 cursor-pointer">
                 <input type="checkbox" className="mt-0.5 rounded cursor-pointer" style={{ accentColor: '#4361EE' }} />
@@ -249,13 +249,13 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
 
       {/* Footer Audit Triggers */}
       <div className="flex justify-between items-center pt-4 border-t border-white/[0.04]">
-        <span className="text-[10px] font-mono" style={{ color: 'rgba(254,250,224,0.35)' }}>Replay Session ID: {session_id}</span>
+        <span className="text-[10px]" style={{ color: 'rgba(254,250,224,0.35)' }}>Replay Session ID: <span className="font-mono">{session_id}</span></span>
         <div className="flex space-x-3">
           {onReset && (
             <button
               type="button"
               onClick={onReset}
-              className="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all"
+              className="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all font-display"
               style={{
                 background: 'transparent',
                 border: '1px solid rgba(254,250,224,0.08)',
@@ -268,7 +268,7 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
           <button
             type="button"
             onClick={() => onNavigateToSession(session_id)}
-            className="px-4 py-1.5 rounded-lg text-white text-[10px] font-bold transition-all flex items-center space-x-1.5"
+            className="px-4 py-1.5 rounded-lg text-white text-[10px] font-bold transition-all flex items-center space-x-1.5 font-display"
             style={{
               background: '#4361EE',
               boxShadow: '0 4px 12px rgba(67,97,238,0.3)',
@@ -280,11 +280,11 @@ export default function IncidentIntelligencePanel({ result, onNavigateToSession,
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-1.5 rounded-lg text-[10px] font-medium transition-all"
+              className="px-3.5 py-1.5 rounded-lg text-[10px] font-medium transition-all font-display"
               style={{
                 background: 'transparent',
                 border: '1px solid rgba(254,250,224,0.08)',
-                color: 'rgba(254,250,224,0.6)'
+                color: 'rgba(254, 250, 224, 0.6)'
               }}
             >
               Close Assessment
